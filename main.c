@@ -1,5 +1,4 @@
-# include <stdio.h>
-# include "constants.h"
+# include "headers.h"
 
 int main(){
     /* === DECLARTION ===*/
@@ -28,25 +27,19 @@ int main(){
     /* === CMS START === */
     
     /* OPEN FILE (TRISTAN) */
-    // * indicates variable is a pointer
-    FILE *fp; 
-    
-    printf("Opening file...\n");
-    fp = fopen(FILENAME, "r");
-    
-    // check if file opened successfully
-    if (fp == NULL) {
-        perror("Error opening file"); 
+    char **file_content = open_and_read_file();
+
+    if (!file_content) {
+        printf("Failed to retrieve file contents,\n");
         return 1;
     }
-    printf("File opened sucessfully!\n");
-    
-    // read file and store in buffer
-    
+    /* test reading from file
+    for (size_t i = 0; i < sizeof(file_content) + 1; i++) {
+        printf("%s", file_content[i]);
+    }
+    */
+    // DO OPERATIONS ON FILE_CONTENT
 
-    fclose(fp);
-
-         
     // SHOW ALL (ALVAN)
     
     // INSERT
