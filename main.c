@@ -25,37 +25,92 @@ int main(){
     printf("Date: %d\n\n", DATE_COMPLETED);
 
     /* === CMS START === */
-    
-    /* OPEN FILE (TRISTAN) */
-    char **file_content = open_and_read_file();
-
-    if (!file_content) {
-        printf("Failed to retrieve file contents,\n");
-        return 1;
+    printf("%c", '*');
+    for (int i = 0; i < 50; i++) {
+        printf("%c", '-');
     }
-    /* test reading from file
-    for (size_t i = 0; i < sizeof(file_content) + 1; i++) {
-        printf("%s", file_content[i]);
+    printf("%s", "Welcome to P8-9 CMS");
+    for (int i = 0; i < 50; i++) {
+        printf("%c", '-');
     }
-    */
-    // DO OPERATIONS ON FILE_CONTENT
+    printf("%c\n", '*');
 
-    // SHOW ALL (ALVAN)
-    
-    // INSERT
-    
-    // QUERY
-    
-    // UPDATE
-    
-    // DELETE
-    
-    // SAVE
-    
-    // SORTING
-    
-    // SUMMARY (ALVAN)
-    
-    // UNIQUE
-    return 0;
+    /* === MAIN FUNCTION === */
+    do {
+        // Get User Input
+        char input[MAX_INPUT];
+        bool success = false; 
+        
+        do { // validation
+
+            printf("cms>");
+            
+            if (fgets(input, sizeof(input), stdin) == NULL) {
+                printf("%s\n", "Invalid input.");
+                continue;
+            }
+
+            // buffer overflow
+            int len = strlen(input);
+            if (len > 0 && input[len - 1] != '\n') { // check if last char is \n
+                int c;
+                while ((c = getchar()) != '\n' && c != EOF); // clear buffer
+                
+                printf("Input too long, max %d characters\n", MAX_INPUT - 2); // <-- fgets + \n
+                continue;
+            }
+
+            // more validation below
+             
+            if (len > 0 && input[len - 1] == '\n') {
+                input[len - 1] = '\0';
+                len--;
+            }
+
+            success = true;
+        } while (!success);
+        
+       // convert to uppercase
+        for (size_t i = 0; i < (sizeof(input) / sizeof(input[0])); i++){
+            input[i] = toupper((unsigned char) input[i]);
+        }
+        
+
+        /* OPEN FILE (TRISTAN) */
+        if (strcmp(input, "OPEN") == 0) {
+            char **file_content = open_and_read_file();
+
+            if (!file_content) {
+                printf("Failed to retrieve file contents,\n");
+                return 1;
+            }
+            /* test reading from file
+            for (size_t i = 0; i < sizeof(file_content) + 1; i++) {
+                printf("%s", file_content[i]);
+            }
+            */ 
+        }
+       
+        // DO OPERATIONS ON FILE_CONTENT
+
+        // SHOW ALL (ALVAN)
+        
+        // INSERT
+        
+        // QUERY
+        
+        // UPDATE
+        
+        // DELETE
+        
+        // SAVE
+        
+        // SORTING
+        
+        // SUMMARY (ALVAN)
+        
+        // UNIQUE
+
+    } while (true);
+       return 0;
 }
