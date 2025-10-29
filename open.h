@@ -1,3 +1,4 @@
+// Done by: Tristan Tan
 #ifndef OPEN_H
 #define OPEN_H
 #define MORE_LINES 1024
