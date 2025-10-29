@@ -1,11 +1,18 @@
 // Done by: Tristan Tan
 #ifndef OPEN_H
 #define OPEN_H
-#define MORE_LINES 1024
-#define MORE_CHARS 1024
+#define ARRAY_SIZE 1024 
+#define DELIM ","
 
-# include "headers.h"
+#include "headers.h"
 
-char **open_and_read_file();
+struct Record {
+    int id;
+    char name[100];
+    char prog[256];
+    float marks;
+};
+
+int open_and_read_file(struct Record **records);
 
 #endif

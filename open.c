@@ -1,83 +1,91 @@
 // Done by: Tristan Tan
 # include "open.h"
 
-char **open_and_read_file(){
+int open_and_read_file(struct Record **records){
     printf("Opening file...\n");
     FILE *file = fopen(FILENAME, "r");
     
     //check if file opened successfully
     if (file == NULL) {
-        perror("Error opening file"); 
-        return NULL;
+        printf("Error opening file"); 
+        return -1;
     }
     printf("File opened sucessfully!\n");
     
-    // read file and store in buffer
-    char **lines; // <-- pointer to a pointer
-    lines = malloc(sizeof(char *) * MORE_LINES);
+    // read file and store in struct
+    int line_count = 0;
+    *records = malloc(sizeof(struct Record) * ARRAY_SIZE);
 
-    size_t total_lines = 0; //<-- size_t stores large non negative int
-    size_t total_chars = 0;
-
-    do {
-        char c = fgetc(file);
-
-        // error reading from file
-        if (ferror(file)) {
-            perror("Error reading from file");
-            return NULL;
-        }
-
-        // reached EOF
-        if (feof(file)) {
-            // reallocating memory incase file does not end with \n or \0 
-            if (total_chars != 0){
-                lines[total_lines] = realloc(lines[total_lines], total_chars + 1); // <-- leave space for null byte
-                lines[total_lines][total_chars] = '\0'; // <-- append terminating null byte
-                
-                total_lines++;
-            }
-            break;
-        }
-
-        if (total_chars == 0) {
-            lines[total_lines] = malloc(MORE_CHARS); // <-- pointer created in lines[total_lines]
-        }
-
-        lines[total_lines][total_chars] = c; // <-- store character
-        total_chars++;
-
-        // reached EOL
-        if (c == '\n') {
-            // dynamically reallocate memory based on total no. of chars 
-            lines[total_lines] = realloc(lines[total_lines], total_chars + 1); // <-- leave space for null byte
-            lines[total_lines][total_chars] = '\0'; // <-- append terminating null byte
-            
-            total_lines++;
-            total_chars = 0;
-
-            // reached end of allocated lines
-            if (total_lines % MORE_LINES == 0){
-                size_t new_size = total_lines + MORE_LINES; // <-- new array length
-                lines = realloc(lines, sizeof(char *) * new_size); // <-- sizeof as size of pointer may differ between compilers
-            } 
-        }
-        // not enough space to store characters in current line
-        else if (total_chars % MORE_CHARS == 0){
-            size_t new_size = total_chars + MORE_CHARS;
-            lines[total_lines] = realloc(lines[total_lines], new_size);
-        }
-
-    } while (true);
-
-    // finally, reallocate array memory
-    lines = realloc(lines, sizeof(char *) * total_lines);
-
-    /* for testing
-    for (size_t i = 0; i < total_lines; i++) {
-        print("%s", lines[i]);
+    if (records == NULL) {
+        printf("Failed to initialize record memory.\n");
+        fclose(file);
+        return -1;
     }
-    */
+
+    char string[256];
+
+    while (fgets(string, sizeof(string), file)) {
+        // strip \n
+        string[strcspn(string, "\n")] = 0;
+
+        if (line_count > ARRAY_SIZE) { // rows exceeded allocated size
+            struct Record *temp = realloc(*records, sizeof(struct Record) + ARRAY_SIZE);
+            if (temp == NULL) {
+                printf("Failed to expand Record memory.\n");
+                fclose(file);
+                return -1;
+            }
+            *records = temp;
+        }
+        // ID column
+        char *token = strtok(string, DELIM); //search for delim in current line
+        if (token != NULL) {
+            (*records)[line_count].id = atoi(token);
+        }
+        else {
+            printf("No delimiter %c for ID column", DELIM);
+            return 1;
+        }
+
+        // Name column
+        token = strtok(NULL, DELIM);
+        if (token != NULL) {
+           strncpy((*records)[line_count].name, token, sizeof((*records)[line_count].name) - 1);
+           (*records)[line_count].name[sizeof((*records)[line_count].name - 1)] = '\0'; // add null byte
+        }
+        else {
+            printf("No delimiter %c for ID column", DELIM);
+            return -1;
+        }
+        // Programme column
+        token = strtok(NULL, DELIM);
+        if (token != NULL) {
+           strncpy((*records)[line_count].prog, token, sizeof((*records)[line_count].prog) - 1);
+           (*records)[line_count].prog[sizeof((*records)[line_count].prog - 1)] = '\0'; // add null byte
+        }
+        else {
+            printf("No delimiter %c for ID column", DELIM);
+            return -1;
+        }
+
+        // Marks column delimiter = '\n' since last element of row
+        token = strtok(NULL, "\n");
+        if (token != NULL) {
+            (*records)[line_count].marks = atof(token);
+        }
+        else {
+            printf("No delimiter %c for ID column \\n.");
+            return -1;
+        }
+
+        line_count++; // go to next line
+    }
+
+    /**/
+    /* for (size_t i = 0; i < sizeof(records); i++) { */
+    /*     printf("ID: %c, Name: %s, Prog: %s, Marks: %f\n", records[i].id, records[i].name, records[i].prog, records[i].marks); */
+    /* } */
+       
 
     /* TO FREE MEMORY USED BY LINES ARRAY
     for (size_t i = 0; i < total_lines; i++) {
@@ -88,5 +96,5 @@ char **open_and_read_file(){
 
     fclose(file);
 
-    return lines;
+    return line_count;
 }

@@ -43,7 +43,7 @@ int main(){
         
         do { // validation
 
-            printf("cms>");
+            printf("%s: ", USER);
             
             if (fgets(input, sizeof(input), stdin) == NULL) {
                 printf("%s\n", "Invalid input.");
@@ -70,7 +70,7 @@ int main(){
             success = true;
         } while (!success);
         
-       // convert to uppercase
+        // convert to uppercase
         for (size_t i = 0; i < (sizeof(input) / sizeof(input[0])); i++){
             input[i] = toupper((unsigned char) input[i]);
         }
@@ -78,18 +78,29 @@ int main(){
 
         /* OPEN FILE (TRISTAN) */
         if (strcmp(input, "OPEN") == 0) {
-            char **file_content = open_and_read_file();
+            struct Record *records = NULL;
+            int records_size = open_and_read_file(&records);
+            
+            printf("CMS: \n");
 
-            if (!file_content) {
-                printf("Failed to retrieve file contents,\n");
+            if (!records) {
+                printf("Failed to read from database file %s.\n", FILENAME);
                 return 1;
             }
-            /* test reading from file
-            for (size_t i = 0; i < sizeof(file_content) + 1; i++) {
-                printf("%s", file_content[i]);
+            if (records_size <= 0) {
+                printf("Invalid record size.\n");
             }
-            */ 
+            // printf("%d", records_size)
+            // for (size_t i = 0; i < records_size; i++) {
+            //     printf("ID: %d, Name: %s, Prog: %s, Marks: %f\n", records[i].id, records[i].name, records[i].prog, records[i].marks); 
+            // }
         }
+        // READ THIS:
+        // Records is an array of Structures (Classes)
+        // Loop through the array and access attributes of each structure (row) using:
+        // records[i].<element> <-- refer to open.h for attribute names
+        // use records_size for your loop size
+         
        
         // DO OPERATIONS ON FILE_CONTENT
 
