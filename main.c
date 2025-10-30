@@ -36,19 +36,21 @@ int main(){
     printf("%c\n", '*');
 
     /* === MAIN FUNCTION === */
+
+    bool file_opened = false; // check if DB opened
     do {
         // Get User Input
         char input[MAX_INPUT];
         bool success = false; 
         
-        do { // validation
+        do { // explore using strtok directly
 
             printf("%s: ", USER);
-            
-            if (fgets(input, sizeof(input), stdin) == NULL) {
-                printf("%s\n", "Invalid input.");
-                continue;
-            }
+
+            fgets(input, sizeof(input), stdin);
+            //input[strcspn(input, "\n")] = 0;
+
+            printf("%s: ", CMS);
 
             // buffer overflow
             int len = strlen(input);
@@ -60,7 +62,11 @@ int main(){
                 continue;
             }
 
-            // more validation below
+            if (len == 1) {
+                printf("Enter a command.\n");
+                continue;
+            }
+            // insert more validation below
              
             if (len > 0 && input[len - 1] == '\n') {
                 input[len - 1] = '\0';
@@ -70,18 +76,15 @@ int main(){
             success = true;
         } while (!success);
         
-        // convert to uppercase
-        for (size_t i = 0; i < (sizeof(input) / sizeof(input[0])); i++){
-            input[i] = toupper((unsigned char) input[i]);
-        }
-        
+        to_upper(input);       
+        struct Record *records;
+        int records_size;
+        char *token = strtok(input, " ");
 
-        printf("CMS: ");
         /* OPEN FILE (TRISTAN) */
-        if (strcmp(input, "OPEN") == 0) {
+        if (strcmp(token, "OPEN") == 0) {
             // call open file func
-            struct Record *records = NULL;
-            int records_size = open_and_read_file(&records);
+            records_size = open_and_read_file(&records);
 
             if (!records) {
                 printf("Failed to read from database file %s.\n", FILENAME);
@@ -94,39 +97,188 @@ int main(){
             // -- more validation here -- // 
 
             printf("The database file \"%s\" is successfully opened.\n", FILENAME);
+            file_opened = true;
 
-            // printf("%d", records_size)
-            // for (size_t i = 0; i < records_size; i++) {
-            //     printf("ID: %d, Name: %s, Prog: %s, Marks: %f\n", records[i].id, records[i].name, records[i].prog, records[i].marks); 
-            // }
+            
         }
-        // READ THIS:
-        // Records is an array of Structures (Classes)
-        // Loop through the array and access attributes of each structure (row) using:
-        // records[i].<element> <-- refer to open.h for attribute names
-        // use records_size for your loop size
-         
-       
-        // DO OPERATIONS ON FILE_CONTENT
+        /*
+         * READ THIS:
+         * Records is an array of Structures (Classes)
+         * Loop through the array and access attributes of each structure (row) using:
+         * records[i].<element> <-- refer to open.h for attribute names
+         * use records_size for your loop sizeof
+         */
+        // DO OPERATIONS ON RECORDS 
 
         // SHOW ALL (ALVAN)
         
-        // INSERT
+        // SAVE
         
+        // INSERT
+        else if ((strcmp(token, "INSERT") == 0) && file_opened) {
+            //check for entry first
+            char *attributes[] = {"ID", "NAME", "PROG", "MARK"};
+            bool ins_fail = false;
+            InsertData data;
+
+            for (int i = 0; i < 4; i++){
+                token = strtok(NULL, INSERT_DELIM); // "=" === key
+
+                if (token == NULL) {
+                    if (i == 0) {
+                        printf("Provide ID field.\n");
+                        ins_fail = true;
+                        break;
+                    }
+                }
+                
+                // token not null
+                to_upper(token);
+                char *key = token; // store key (temp var)
+
+                // check if value in input (reverse checking)
+                if ((token = strtok(NULL, " ")) != NULL) {
+                    if (strcmp(key, "ID") == 0) {
+                        printf("%s\n", token);
+                        for (int i = 0; i < ((sizeof(token) / sizeof(token[0])) - 1); i++) {
+                            if (!isdigit(token[i])) {
+                               printf("%c %d\n", token[i], i); 
+                                printf("ID should only have integers.\n");
+                                ins_fail = true;
+                                break;
+                            }
+                        }
+                        data.id = atoi(token);
+                        data.has_id = true;
+                    }
+                    else if (strcmp(key, "NAME") == 0) {
+                        if (strlen(token) > 100) {
+                            printf("Name max 100 characters.\n");
+                            ins_fail = true;
+                            break;
+                        }
+                        strncpy(data.name, token, 99);
+                        data.name[99] = 0;
+                        data.has_name = true;
+                    }
+                    else if (strcmp(key, "PROG") == 0) {
+                        if (strlen(token) > 250) {
+                            printf("Programme max 250 characters.\n");
+                            ins_fail = true;
+                            break;
+                        }
+                        strncpy(data.prog, token, 249);
+                        data.prog[249] = 0; 
+                        data.has_prog = true;
+                    }
+                    else if (strcmp(key, "MARK") == 0) {
+                        float value;
+                        char *endptr;
+
+                        value = strtof(token, &endptr);
+                        if (*endptr == "\0" || endptr == token) {
+                            printf("Marks should be float value.\n");
+                            ins_fail = true;
+                            break;
+                        }
+                        data.mark = value;
+                        data.has_mark = true;
+                    }
+                }
+                else {
+                    if (!data.has_id) {
+                        printf("Provide ID field\n");
+                        ins_fail = true;
+                        break;
+                    }
+                }
+            }
+
+            if (ins_fail) continue; 
+
+            if (data.has_id) {
+                int user_exist = check_record_exists(data.id, records_size, records);
+
+                if (user_exist == 1) { // user found
+                    printf("The record with ID=%d already exists.\n", data.id);
+                    ins_fail = true;
+                }
+
+                if (!data.has_name || !data.has_prog || !data.has_mark) {
+                    printf("Must have Name, Programme, and Mark fields.\n");
+                }
+
+                int insert_result = insert(data, records);
+
+                if (insert_result != 0) {
+                    printf("Error adding record with ID=%d\n", data.id);
+                    ins_fail = true;
+                }
+                else {
+                    printf("A new record with ID=%d has been added.\n", data.id);
+                }
+            } 
+                            
+            if (ins_fail) continue; 
+            // for (int i = 0; i < (sizeof(attributes) / sizeof(attributes[0])); i++) {
+            //
+            //     if (i == 0 && token == NULL) {
+            //         printf("Enter a valid INSERT input.\n");
+            //         ins_fail = true;
+            //         break;
+            //     }
+            //     else if (token == NULL) {
+            //         continue;
+            //     }
+            //     to_upper(token);
+            //     if (strcmp(token, attributes[i]) != 0) {
+            //         printf("Please enter %s Field.\n", attributes[i]);
+            //         ins_fail = true;
+            //         continue;
+            //     }
+            //     token = strtok(NULL, " "); // corresponding value
+            //     if (token != NULL) {
+            //         if (i == 0) {
+            //             unsigned int id = atoi(token);
+            //             // if id in records
+            //             if ((check_record_exists(id, records_size, records)) == 1) {
+            //                 printf("The record with ID=%d already exists.\n", id);
+            //                 continue;
+            //             }
+            //             else {
+            //
+            //             }
+            //         }
+            //     }
+            //     else{
+            //         ins_fail = true;
+            //         break;
+            //     }
+            //
+            // }
+
+        }
+        //insert new entry
+
         // QUERY
         
         // UPDATE
         
         // DELETE
         
-        // SAVE
         
         // SORTING
         
         // SUMMARY (ALVAN)
         
         // UNIQUE
-
+        else if (!file_opened) {
+            printf("Open database file first.\n");
+            continue;
+        }
+        for (size_t i = 0; i < records_size; i++) {
+            printf("ID: %d, Name: %s, Prog: %s, Marks: %.2f\n", records[i].id, records[i].name, records[i].prog, records[i].marks); 
+        }
     } while (true);
        return 0;
 }

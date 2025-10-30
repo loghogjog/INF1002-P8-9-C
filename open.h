@@ -1,8 +1,9 @@
 // Done by: Tristan Tan
 #ifndef OPEN_H
 #define OPEN_H
+
 #define ARRAY_SIZE 1024 
-#define DELIM ","
+#define OPEN_DELIM ","
 
 #include "headers.h"
 

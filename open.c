@@ -37,33 +37,33 @@ int open_and_read_file(struct Record **records){
             *records = temp;
         }
         // ID column
-        char *token = strtok(string, DELIM); //search for delim in current line
+        char *token = strtok(string, OPEN_DELIM); //search for delim in current line
         if (token != NULL) {
             (*records)[line_count].id = atoi(token);
         }
         else {
-            printf("No delimiter %c for ID column", DELIM);
+            printf("No delimiter %s for ID column", OPEN_DELIM);
             return 1;
         }
 
         // Name column
-        token = strtok(NULL, DELIM);
+        token = strtok(NULL, OPEN_DELIM);
         if (token != NULL) {
            strncpy((*records)[line_count].name, token, sizeof((*records)[line_count].name) - 1);
            (*records)[line_count].name[sizeof((*records)[line_count].name - 1)] = '\0'; // add null byte
         }
         else {
-            printf("No delimiter %c for ID column", DELIM);
+            printf("No delimiter %s for Name column", OPEN_DELIM);
             return -1;
         }
         // Programme column
-        token = strtok(NULL, DELIM);
+        token = strtok(NULL, OPEN_DELIM);
         if (token != NULL) {
            strncpy((*records)[line_count].prog, token, sizeof((*records)[line_count].prog) - 1);
            (*records)[line_count].prog[sizeof((*records)[line_count].prog - 1)] = '\0'; // add null byte
         }
         else {
-            printf("No delimiter %c for ID column", DELIM);
+            printf("No delimiter %s for Prog column", OPEN_DELIM);
             return -1;
         }
 
@@ -73,7 +73,7 @@ int open_and_read_file(struct Record **records){
             (*records)[line_count].marks = atof(token);
         }
         else {
-            printf("No delimiter %c for ID column \\n.");
+            printf("No delimiter %d for Marks column.\n", '\n');
             return -1;
         }
 
