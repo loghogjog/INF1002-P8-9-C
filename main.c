@@ -76,12 +76,12 @@ int main(){
         }
         
 
+        printf("CMS: ");
         /* OPEN FILE (TRISTAN) */
         if (strcmp(input, "OPEN") == 0) {
+            // call open file func
             struct Record *records = NULL;
             int records_size = open_and_read_file(&records);
-            
-            printf("CMS: \n");
 
             if (!records) {
                 printf("Failed to read from database file %s.\n", FILENAME);
@@ -89,7 +89,12 @@ int main(){
             }
             if (records_size <= 0) {
                 printf("Invalid record size.\n");
+                return 1;
             }
+            // -- more validation here -- // 
+
+            printf("The database file \"%s\" is successfully opened.\n", FILENAME);
+
             // printf("%d", records_size)
             // for (size_t i = 0; i < records_size; i++) {
             //     printf("ID: %d, Name: %s, Prog: %s, Marks: %f\n", records[i].id, records[i].name, records[i].prog, records[i].marks); 

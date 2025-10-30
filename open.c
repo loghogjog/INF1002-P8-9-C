@@ -10,7 +10,6 @@ int open_and_read_file(struct Record **records){
         printf("Error opening file"); 
         return -1;
     }
-    printf("File opened sucessfully!\n");
     
     // read file and store in struct
     int line_count = 0;
@@ -81,13 +80,7 @@ int open_and_read_file(struct Record **records){
         line_count++; // go to next line
     }
 
-    /**/
-    /* for (size_t i = 0; i < sizeof(records); i++) { */
-    /*     printf("ID: %c, Name: %s, Prog: %s, Marks: %f\n", records[i].id, records[i].name, records[i].prog, records[i].marks); */
-    /* } */
-       
-
-    /* TO FREE MEMORY USED BY LINES ARRAY
+    /* TO FREE MEMORY USED BY ARRAY
     for (size_t i = 0; i < total_lines; i++) {
         free(lines[i]);
     }
