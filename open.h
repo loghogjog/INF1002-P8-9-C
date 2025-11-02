@@ -12,6 +12,12 @@ struct Record {
     char name[100];
     char prog[256];
     float marks;
+
+    bool has_id;
+    bool has_name;
+    bool has_prog;
+    bool has_mark;
+
 };
 
 int open_and_read_file(struct Record **records);
