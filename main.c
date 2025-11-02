@@ -36,19 +36,21 @@ int main(){
     printf("%c\n", '*');
 
     /* === MAIN FUNCTION === */
+
+    bool file_opened = false; // check if DB opened
     do {
         // Get User Input
         char input[MAX_INPUT];
         bool success = false; 
         
-        do { // validation
+        do { // explore using strtok directly
 
             printf("%s: ", USER);
-            
-            if (fgets(input, sizeof(input), stdin) == NULL) {
-                printf("%s\n", "Invalid input.");
-                continue;
-            }
+
+            fgets(input, sizeof(input), stdin);
+            //input[strcspn(input, "\n")] = 0;
+
+            printf("%s: ", CMS);
 
             // buffer overflow
             int len = strlen(input);
@@ -60,7 +62,11 @@ int main(){
                 continue;
             }
 
-            // more validation below
+            if (len == 1) {
+                printf("Enter a command.\n");
+                continue;
+            }
+            // insert more validation below
              
             if (len > 0 && input[len - 1] == '\n') {
                 input[len - 1] = '\0';
@@ -70,18 +76,16 @@ int main(){
             success = true;
         } while (!success);
         
-        // convert to uppercase
-        for (size_t i = 0; i < (sizeof(input) / sizeof(input[0])); i++){
-            input[i] = toupper((unsigned char) input[i]);
-        }
-        
+        to_lower(input);       
+        printf("%s\n", input); // debug
+        struct Record *records;
+        int records_size;
+        char *token = strtok(input, " ");
 
-        printf("CMS: ");
         /* OPEN FILE (TRISTAN) */
-        if (strcmp(input, "OPEN") == 0) {
+        if (strcmp(token, "open") == 0) {
             // call open file func
-            struct Record *records = NULL;
-            int records_size = open_and_read_file(&records);
+            records_size = open_and_read_file(&records);
 
             if (!records) {
                 printf("Failed to read from database file %s.\n", FILENAME);
@@ -94,39 +98,53 @@ int main(){
             // -- more validation here -- // 
 
             printf("The database file \"%s\" is successfully opened.\n", FILENAME);
+            file_opened = true;
 
-            // printf("%d", records_size)
-            // for (size_t i = 0; i < records_size; i++) {
-            //     printf("ID: %d, Name: %s, Prog: %s, Marks: %f\n", records[i].id, records[i].name, records[i].prog, records[i].marks); 
-            // }
+            
         }
-        // READ THIS:
-        // Records is an array of Structures (Classes)
-        // Loop through the array and access attributes of each structure (row) using:
-        // records[i].<element> <-- refer to open.h for attribute names
-        // use records_size for your loop size
-         
-       
-        // DO OPERATIONS ON FILE_CONTENT
+        /*
+         * READ THIS:
+         * Records is an array of Structures (Classes)
+         * Loop through the array and access attributes of each structure (row) using:
+         * records[i].<element> <-- refer to open.h for attribute names
+         * use records_size for your loop sizeof
+         */
+        // DO OPERATIONS ON RECORDS 
 
         // SHOW ALL (ALVAN)
         
-        // INSERT
+        // SAVE
         
+        // INSERT
+        else if ((strcmp(token, "insert") == 0) && file_opened) {
+            //check for entry first
+            bool ins_fail = false;
+            struct Record new_record;
+            ins_fail = insert(new_record, records, &records_size, token); // key function
+            if (ins_fail) {
+                continue; // error msgs printed in insert()
+            }
+            
+        }
         // QUERY
         
         // UPDATE
         
         // DELETE
         
-        // SAVE
         
         // SORTING
         
         // SUMMARY (ALVAN)
         
         // UNIQUE
-
+        else if (!file_opened) {
+            printf("Open database file first.\n");
+            continue;
+        }
+        for (size_t i = 0; i < records_size; i++) {
+            printf("ID: %d, Name: %s, Prog: %s, Marks: %.2f\n", records[i].id, records[i].name, records[i].prog, records[i].marks); 
+        }
     } while (true);
        return 0;
 }
