@@ -20,6 +20,6 @@ struct Record {
 
 };
 
-int open_and_read_file(struct Record **records);
+int open_and_read_file(struct Record **records, const char *filename);
 
 #endif
