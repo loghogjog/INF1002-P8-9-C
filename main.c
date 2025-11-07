@@ -89,9 +89,6 @@ int main(){
         int records_size;
         char *token = strtok(input_copy, " ");
 
-        char *snapshot_ptr;
-
-
         /* OPEN FILE (TRISTAN) */
         if (strcmp(token, "open") == 0) {
             // call open file func
@@ -148,22 +145,44 @@ int main(){
         // SUMMARY (ALVAN)
         
         // UNIQUE
-        else if ((snapshot_ptr = strstr(input, "create snapshot")) != NULL) {
-            char *snapshot_name = snapshot_ptr + strlen("create snapshot ");
-            if (strlen(snapshot_name) == 0) {
-                printf("Snapshot name not provided.\n");
-                continue;
+        else if (strstr(input, "snapshot") != NULL) {
+            char cwd[1024]; // current working directory
+            if (getcwd(cwd, sizeof(cwd)) == NULL) {
+                perror("Error getting current working directory %s.\n");
+                return 1;
             }
-            create_snapshot(snapshot_name);   
-        }
-        else if ((snapshot_ptr = strstr(input, "restore snapshot")) != NULL) {
-            char *snapshot_name = snapshot_ptr + strlen("restore snapshot ");
-            if (strlen(snapshot_name) == 0) {
-                printf("Snapshot name not provided.\n");
-                continue;
+
+            char *snapshot_ptr;
+            char *snapshot_name;
+            if ((snapshot_ptr = strstr(input, "create snapshot")) != NULL) {
+                snapshot_name = snapshot_ptr + strlen("create snapshot ");
+                if (strlen(snapshot_name) == 0) {
+                    printf("Snapshot name not provided.\n");
+                    continue;
+                }
+                else if (strlen(snapshot_name) > 50) {
+                    printf("Snapshot name too long. Max 50 characters.\n");
+                    continue;
+                }
+                bool result = create_snapshot(snapshot_name, cwd);
             }
-            restore_snapshot(snapshot_name);   
-        }
+            else if ((snapshot_ptr = strstr(input, "restore snapshot")) != NULL) {
+                snapshot_name = snapshot_ptr + strlen("restore snapshot ");
+                if (strlen(snapshot_name) == 0) {
+                    printf("Snapshot name not provided.\n");
+                    continue;
+                }
+                restore_snapshot(snapshot_name, cwd);
+            }     
+            else if ((snapshot_ptr = strstr(input, "delete snapshot")) != NULL) {
+                snapshot_name = snapshot_ptr + strlen("delete snapshot ");
+                if (strlen(snapshot_name) == 0) {
+                    printf("Snapshot name not provided.\n");
+                    continue;
+                }
+                delete_snapshot(snapshot_name, cwd);
+            }
+        } 
         else if (!file_opened) {
             printf("Open database file first.\n");
             continue;

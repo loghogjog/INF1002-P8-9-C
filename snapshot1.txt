@@ -1,3 +1,0 @@
-2301234,Joshua C,Software,70.50
-2201234,Isaac Te,Computer,63.40
-2304567,John Lev,Digital ,85.90
