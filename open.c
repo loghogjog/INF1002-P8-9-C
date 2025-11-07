@@ -1,9 +1,9 @@
 // Done by: Tristan Tan
 # include "open.h"
 
-int open_and_read_file(struct Record **records){
+int open_and_read_file(struct Record **records, const char *filename) {
     printf("Opening file...\n");
-    FILE *file = fopen(FILENAME, "r");
+    FILE *file = fopen(filename, "r");
     
     //check if file opened successfully
     if (file == NULL) {

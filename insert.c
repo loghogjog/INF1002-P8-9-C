@@ -1,4 +1,4 @@
-#include "headers.h"
+# include "insert.h"
 
 int check_record_exists(int id, int *size, struct Record *records) {
     for (int i = 0; i < *size; i++) {
@@ -180,7 +180,7 @@ bool insert(struct Record data, struct Record *records, int *records_size, char 
 
    
     if ((check_record_exists(data.id, records_size, records) == 1)) {
-        printf("The Record with ID=%s already exists.\n", data.id);
+        printf("The Record with ID=%d already exists.\n", data.id);
         return true;
     }
     // TODO: capitalize name and prog
@@ -217,6 +217,8 @@ bool insert(struct Record data, struct Record *records, int *records_size, char 
         perror("Something went wrong while inserting record.\n");
         return 1;
     }
+
+
     return false;
 }
 
