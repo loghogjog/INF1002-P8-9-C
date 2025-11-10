@@ -1,4 +1,4 @@
-#ifndef HEADERS_H 
+#ifndef HEADERS_H
 #define HEADERS_H
 
 #include <stdio.h>
@@ -6,12 +6,14 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <dirent.h>
 
 #define DATE_COMPLETED 1234
 #define FILENAME "P8_9-CMS.txt"
 #define USER "P8-9"
-#define MAX_INPUT 256 
+#define MAX_INPUT 256
 #define CMS "CMS"
+#define SHOW_ALL 1
 
 // Custom Functions/Header files
 #include "open.h"

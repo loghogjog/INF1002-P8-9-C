@@ -6,7 +6,7 @@ int save(const char *filename, const char *data) {
         perror("fopen");
         return -1;
     }
-    fprintf(file, "%s", data);
+    printf(file, "%s", data);
     fclose(file);
     return 0;
 }
