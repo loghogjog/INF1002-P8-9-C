@@ -1,12 +1,20 @@
-#include "headers.h"
+#include <headers.h>
 
-int save(const char *filename, const char *data) {
-    FILE *file = fopen(filename, "w");
-    if (file == NULL) {
-        perror("fopen");
-        return -1;
-    }
-    printf(file, "%s", data);
-    fclose(file);
-    return 0;
+//write or save file
+int save(char *filename, char *data) {
+	//save to file in writable mode
+	FILE *file = fwrite(FILENAME, "w");
+	
+	//throw error if file fail to save
+	if (file == NULL) {
+		printf("Fail to save file");
+		return -1;
+	}
+	//save whatever into txt file via fprintf, close the file
+	fprintf(file, "%s", data);
+	fclose(file);
+	return 0;
 }
+	
+		
+	
