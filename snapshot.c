@@ -246,7 +246,7 @@ bool restore_snapshot(const char *snapshot_name, char *cwd) {
     return true; 
 }
 
-//FIX: PREVENT COMMAND INJECTION BY VALIDATING SNAPSHOT name && ONLY ALLOW DELETE IN SNAPSHOT FOLDER (else can delete any file in the system)
+//TODO:TEST COMMAND INJECTION 
 bool delete_snapshot(const char *snapshot_name, char *cwd) {
     if (!is_valid_snapshot_name(snapshot_name)) {
         printf("Invalid snapshot name provided.\n");
