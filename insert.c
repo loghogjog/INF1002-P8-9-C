@@ -183,7 +183,7 @@ bool insert(struct Record data, struct Record *records, int *records_size, char 
         printf("The Record with ID=%d already exists.\n", data.id);
         return true;
     }
-    // TODO: capitalize name and prog
+    // capitalize name and prog
     // first ensure there is data to capitalize
     if (data.has_name) {
         data.name[0] = toupper((unsigned char) data.name[0]);
