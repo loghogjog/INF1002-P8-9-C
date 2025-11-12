@@ -117,6 +117,8 @@ int main(){
          * use records_size for your loop sizeof
          */
         // DO OPERATIONS ON RECORDS 
+        // TODO: CREATE HELP MENU
+        // CAN DISPLAY BEFORE OR AFTER WRONG COMMAND ENTERED (TBD)
 
         // SHOW ALL (ALVAN)
         
@@ -182,7 +184,12 @@ int main(){
                 }
                 delete_snapshot(snapshot_name, cwd);
             }
-        } 
+        }
+        // Exit 
+        else if (strcmp(input, "exit") == 0) {
+            printf("Exiting...Goodbye :)\n");
+            break;
+        }
         else if (!file_opened) {
             printf("Open database file first.\n");
             continue;
