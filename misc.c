@@ -1,3 +1,4 @@
+// general miscellaneous functions
 # include "misc.h"
 
 void to_lower(char string[]){
