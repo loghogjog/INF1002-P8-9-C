@@ -2,7 +2,6 @@
 #define HEADERS_H
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
@@ -19,5 +18,6 @@
 #include "open.h"
 #include "insert.h"
 #include "misc.h"
+#include "snapshot.h"
 
 #endif

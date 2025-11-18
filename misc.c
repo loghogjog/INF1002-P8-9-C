@@ -1,4 +1,5 @@
-#include "headers.h"
+// general miscellaneous functions
+# include "misc.h"
 
 void to_lower(char string[]){
     for (size_t i = 0; i < strlen(string); i++){

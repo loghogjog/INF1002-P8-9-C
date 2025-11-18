@@ -77,15 +77,22 @@ int main(){
         } while (!success);
         
         to_lower(input);       
-        printf("%s\n", input); // debug
+        char *input_copy = strdup(input); // to preserve original input jic
+        printf("%s\n", input_copy); // debug
+        
+        if (input_copy == NULL) {
+            printf("Input duplicate failed.\n");
+            return 1;
+        }
+
         struct Record *records;
         int records_size;
-        char *token = strtok(input, " ");
+        char *token = strtok(input_copy, " ");
 
         /* OPEN FILE (TRISTAN) */
         if (strcmp(token, "open") == 0) {
             // call open file func
-            records_size = open_and_read_file(&records);
+            records_size = open_and_read_file(&records, FILENAME);
 
             if (!records) {
                 printf("Failed to read from database file %s.\n", FILENAME);
@@ -110,6 +117,8 @@ int main(){
          * use records_size for your loop sizeof
          */
         // DO OPERATIONS ON RECORDS 
+        // TODO: CREATE HELP MENU
+        // CAN DISPLAY BEFORE OR AFTER WRONG COMMAND ENTERED (TBD)
 
         // SHOW ALL (ALVAN)
         
@@ -138,13 +147,69 @@ int main(){
         // SUMMARY (ALVAN)
         
         // UNIQUE
+        else if (strstr(input, "snapshot") != NULL) {
+            char cwd[1024]; // current working directory
+            if (getcwd(cwd, sizeof(cwd)) == NULL) {
+                perror("Error getting current working directory %s.\n");
+                return 1;
+            }
+
+            char *snapshot_ptr;
+            char *snapshot_name;
+            if ((snapshot_ptr = strstr(input, "create snapshot")) != NULL) {
+                snapshot_name = snapshot_ptr + strlen("create snapshot ");
+                if (strlen(snapshot_name) == 0) {
+                    printf("Snapshot name not provided.\n");
+                    continue;
+                }
+                else if (strlen(snapshot_name) > 50) {
+                    printf("Snapshot name too long. Max 50 characters.\n");
+                    continue;
+                }
+                bool result = create_snapshot(snapshot_name, cwd);
+            }
+            else if ((snapshot_ptr = strstr(input, "restore snapshot")) != NULL) {
+                snapshot_name = snapshot_ptr + strlen("restore snapshot ");
+                if (strlen(snapshot_name) == 0) {
+                    printf("Snapshot name not provided.\n");
+                    continue;
+                }
+                restore_snapshot(snapshot_name, cwd);
+            }     
+            else if ((snapshot_ptr = strstr(input, "delete snapshot")) != NULL) {
+                snapshot_name = snapshot_ptr + strlen("delete snapshot ");
+                if (strlen(snapshot_name) == 0) {
+                    printf("Snapshot name not provided.\n");
+                    continue;
+                }
+                delete_snapshot(snapshot_name, cwd);
+            }
+        }
+        // Exit 
+        else if (strcmp(input, "exit") == 0) {
+            printf("Exiting...Goodbye :)\n");
+            break;
+        }
         else if (!file_opened) {
             printf("Open database file first.\n");
+            continue;
+        }
+        else {
+            printf("Unknown command.\n");
             continue;
         }
         for (size_t i = 0; i < records_size; i++) {
             printf("ID: %d, Name: %s, Prog: %s, Marks: %.2f\n", records[i].id, records[i].name, records[i].prog, records[i].marks); 
         }
     } while (true);
-       return 0;
+
+    /* TO FREE MEMORY USED BY ARRAY
+    for (size_t i = 0; i < total_lines; i++) {
+        free(lines[i]);
+    }
+    free(lines);
+    */
+
+
+    return 0;
 }

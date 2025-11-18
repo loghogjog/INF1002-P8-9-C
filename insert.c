@@ -1,4 +1,4 @@
-#include "headers.h"
+# include "insert.h"
 
 int check_record_exists(int id, int *size, struct Record *records) {
     for (int i = 0; i < *size; i++) {
@@ -31,7 +31,7 @@ bool insert(struct Record data, struct Record *records, int *records_size, char 
     // starting position of each key
     char *id_key = strstr(token, "id=");
     char *name_key = strstr(token, "name=");
-    char *prog_key = strstr(token, "prog=");
+    char *prog_key = strstr(token, "programme=");
     char *mark_key = strstr(token, "mark=");
 
     // Validate ID field exists 
@@ -58,7 +58,7 @@ bool insert(struct Record data, struct Record *records, int *records_size, char 
     keys_array[0].pos = id_key;
     keys_array[1].name = "name";
     keys_array[1].pos = name_key;
-    keys_array[2].name = "prog";
+    keys_array[2].name = "programme";
     keys_array[2].pos = prog_key;
     keys_array[3].name = "mark";
     keys_array[3].pos = mark_key;
@@ -124,7 +124,7 @@ bool insert(struct Record data, struct Record *records, int *records_size, char 
             printf("Value for %s not provided.\n", 
                     strcmp(key_name, "id") == 0 ? "ID":
                     strcmp(key_name, "name") == 0 ? "NAME":
-                    strcmp(key_name, "prog") == 0 ? "PROG":
+                    strcmp(key_name, "programme") == 0 ? "PROGRAMME":
                     strcmp(key_name, "mark") == 0 ? "MARK": "UNKNOWN"); // claude showed rlly cool this ternary operator trick
             return true;
         }
@@ -152,7 +152,7 @@ bool insert(struct Record data, struct Record *records, int *records_size, char 
             data.name[99] = 0;
             data.has_name = true;
         }
-        else if (strcmp(key_name, "prog") == 0) {
+        else if (strcmp(key_name, "programme") == 0) {
             if (strlen(value) > 250) {
                 printf("Programme max 250 characters.\n");
                 return true;
@@ -169,21 +169,32 @@ bool insert(struct Record data, struct Record *records, int *records_size, char 
                 printf("MARK should only have numeric values.\n");
                 return true;
             } 
+            if (mark_value < 0 || mark_value > 100) {
+                printf("Marks should be between 0 to 100.\n");
+                return true;
+            }
             data.marks = mark_value;
             data.has_mark = true;
         }
         else {
-            printf("Only ID, NAME, PROG, and MARK fields allowed.\n");
+            printf("Only ID, NAME, PROGRAMME, and MARK fields allowed.\n");
             return true;
         }
     } // end of loop
 
    
     if ((check_record_exists(data.id, records_size, records) == 1)) {
-        printf("The Record with ID=%s already exists.\n", data.id);
+        printf("The Record with ID=%d already exists.\n", data.id);
         return true;
     }
-    // TODO: capitalize name and prog
+    else {
+        if (optional_count != 3) {
+            printf("The Record with ID=%d does not exists.\n", data.id);
+            return true;
+        }
+    }
+
+    // capitalize name and prog
     // first ensure there is data to capitalize
     if (data.has_name) {
         data.name[0] = toupper((unsigned char) data.name[0]);
@@ -217,6 +228,8 @@ bool insert(struct Record data, struct Record *records, int *records_size, char 
         perror("Something went wrong while inserting record.\n");
         return 1;
     }
+
+
     return false;
 }
 

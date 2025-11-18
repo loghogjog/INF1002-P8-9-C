@@ -1,9 +1,8 @@
 // Done by: Tristan Tan
 # include "open.h"
 
-int open_and_read_file(struct Record **records){
-    printf("Opening file...\n");
-    FILE *file = fopen(FILENAME, "r");
+int open_and_read_file(struct Record **records, const char *filename) {
+    FILE *file = fopen(filename, "r");
     
     //check if file opened successfully
     if (file == NULL) {
@@ -49,8 +48,8 @@ int open_and_read_file(struct Record **records){
         // Name column
         token = strtok(NULL, OPEN_DELIM);
         if (token != NULL) {
-           strncpy((*records)[line_count].name, token, sizeof((*records)[line_count].name) - 1);
-           (*records)[line_count].name[sizeof((*records)[line_count].name - 1)] = '\0'; // add null byte
+           strncpy((*records)[line_count].name, token, sizeof((*records)->name));
+           (*records)[line_count].name[sizeof((*records)[line_count].name) - 1] = '\0'; // add null byte
         }
         else {
             printf("No delimiter %s for Name column", OPEN_DELIM);
@@ -59,8 +58,8 @@ int open_and_read_file(struct Record **records){
         // Programme column
         token = strtok(NULL, OPEN_DELIM);
         if (token != NULL) {
-           strncpy((*records)[line_count].prog, token, sizeof((*records)[line_count].prog) - 1);
-           (*records)[line_count].prog[sizeof((*records)[line_count].prog - 1)] = '\0'; // add null byte
+           strncpy((*records)[line_count].prog, token, sizeof((*records)->prog));
+           (*records)[line_count].prog[sizeof((*records)[line_count].prog) - 1] = '\0'; // add null byte
         }
         else {
             printf("No delimiter %s for Prog column", OPEN_DELIM);
