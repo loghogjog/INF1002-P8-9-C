@@ -7,4 +7,5 @@ void to_lower(char string[]);
 
 int comp(const void *a, const void *b);
 
+void help_menu(char *token);
 #endif // !MISC_H
