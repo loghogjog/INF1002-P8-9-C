@@ -6,7 +6,7 @@ bool file_in_dir(const char *path, const char *snapshot_name) {
     // creates dir if not
     struct stat st = {0};
     if (stat(path, &st) == -1) {
-        mkdir(path, 0755);
+        mkdir(path);
     }
 
     // open dir and search for file

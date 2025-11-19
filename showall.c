@@ -1,22 +1,35 @@
 #include "headers.h"
 
-int showall(const char *dirname, int flags) {
-    DIR *dir;
-    struct dirent *entry;
+int showall(struct Record *records, int total_records)
+{
+    // header
+    printf("\n");
+    printf("All Records: \n");
+    printf("\n");
 
-    dir = opendir(dirname);
-    if (dir == NULL) {
-        perror("opendir");
+    // check if anything in record file
+    if (total_records == 0)
+    {
+        printf("Error, No Records Found! \n");
         return -1;
     }
 
-    while ((entry = readdir(dir)) != NULL) {
-        if (!(flags & SHOW_ALL) && entry->d_name[0] == '.') {
-            continue;
-        }
-        printf("%s\n", entry->d_name);
+    // print table header
+    printf("%-5s %-25s %-25s %-10s\n", "ID", "Name", "Program,", "Marks");
+    printf("----------------------------------------------------------\n");
+
+    // arr record in table
+    int i;
+    for (i = 0; i < total_records; i++)
+    {
+        printf("%-5d %-25s %-25s %-10.2f\n", records[i].id, records[i].name, records[i].prog, records[i].marks);
     }
 
-    closedir(dir);
+    // footer
+    printf("----------------------------------------------------------\n");
+
+    // tabulate record number for easier viewing
+    printf("Total Records: %d\n", total_records);
+
     return 0;
 }

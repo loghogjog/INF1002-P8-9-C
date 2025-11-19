@@ -1,3 +1,5 @@
 main
 bin/*
 *.bak
+.pdf
+.vs

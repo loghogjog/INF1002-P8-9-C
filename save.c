@@ -1,20 +1,30 @@
-#include <headers.h>
+#include "headers.h"
+#include "open.h"
 
-//write or save file
-int save(char *filename, char *data) {
-	//save to file in writable mode
-	FILE *file = fwrite(FILENAME, "w");
-	
-	//throw error if file fail to save
-	if (file == NULL) {
-		printf("Fail to save file");
-		return -1;
-	}
-	//save whatever into txt file via fprintf, close the file
-	fprintf(file, "%s", data);
-	fclose(file);
-	return 0;
+int save(struct Record *records, int total_records)
+{
+    // open file in write mode
+    FILE *file = fopen(FILENAME, "w");
+
+    // check if file open successful
+    if (file == NULL)
+    {
+        printf("Error: Failed to save file '%s'\n", FILENAME);
+        return -1;
+    }
+
+    // write record to file following standard format
+    int i;
+    for (i = 0; i < total_records; i++)
+    {
+        fprintf(file, "%d,%s,%s,%.2f\n", records[i].id, records[i].name, records[i].prog, records[i].marks);
+    }
+
+    // close
+    fclose(file);
+
+    // tell user save successful
+    printf("Successfully saved %d records to '%s'\n", total_records, FILENAME);
+
+    return 0;
 }
-	
-		
-	

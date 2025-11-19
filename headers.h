@@ -2,6 +2,7 @@
 #define HEADERS_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
@@ -13,11 +14,13 @@
 #define MAX_INPUT 256
 #define CMS "CMS"
 #define SHOW_ALL 1
+#define PATH_MAX 260
 
 // Custom Functions/Header files
 #include "open.h"
 #include "insert.h"
 #include "misc.h"
-#include "snapshot.h"
+#include "save.h"
+#include "showall.h"
 
 #endif
