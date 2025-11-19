@@ -142,6 +142,9 @@ int main(){
         // SORTING
         
         // SUMMARY (ALVAN)
+        else if ((strcmp(token, "showsummary") == 0) && file_opened) {
+            showsummary(records, records_size);
+        }
         
         // UNIQUE
         else if (!file_opened) {

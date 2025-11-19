@@ -1,5 +1,4 @@
 #include "headers.h"
-#include "open.h"
 
 int save(struct Record *records, int total_records)
 {

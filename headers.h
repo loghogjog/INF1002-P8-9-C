@@ -22,5 +22,6 @@
 #include "misc.h"
 #include "save.h"
 #include "showall.h"
+#include "showsummary.h"
 
 #endif
