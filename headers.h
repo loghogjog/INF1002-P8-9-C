@@ -15,8 +15,10 @@
 
 // Custom Functions/Header files
 #include "open.h"
-#include "insert.h"
 #include "misc.h"
-#include "snapshot.h"
+#include "insert.h"
+#include "query.h"
+#include "update.h"
+#include "delete.h"
 
 #endif
