@@ -276,7 +276,19 @@ int main(){
         // DELETE
         // SORTING
         // UPDATE
+
+        // SAVE
+        else if (strcmp(token, "save") == 0) {
+            save(records, records_size);
+        }
+        // SHOW ALL
+        else if (strcmp(token, "showall") == 0) {
+            showall(records, records_size);
+        }
         // SUMMARY
+        else if (strcmp(token, "showsummary") == 0) {
+            showsummary(records, records_size);
+        }
         printf("Unknown command.\n");
         free(input_copy);
 
