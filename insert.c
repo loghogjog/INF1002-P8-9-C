@@ -116,7 +116,13 @@ bool insert(struct Record data, struct Record *records, int *records_size, char 
             value_len = next_key_pos - value_pos - 1; // -1 for whitespace
         }
 
-        char value[value_len + 1]; // account for null byte
+        #define MAX_VALUE_LEN 50 // follow max len of program since it is the longest
+        char value[MAX_VALUE_LEN + 1]; // account for null byte
+        
+        if (value_len > MAX_VALUE_LEN) {
+            return true;
+        }
+        
         strncpy(value, value_pos, value_len);
         value[value_len] = '\0';
 
