@@ -11,10 +11,8 @@
 #define DATE_COMPLETED 1234
 #define FILENAME "P8_9-CMS.txt"
 #define USER "P8-9"
-#define MAX_INPUT 256
 #define CMS "CMS"
 #define SHOW_ALL 1
-#define PATH_MAX 260
 
 // Custom Functions/Header files
 #include "open.h"
@@ -23,5 +21,6 @@
 #include "save.h"
 #include "showall.h"
 #include "showsummary.h"
+#include "snapshot.h"
 
 #endif
