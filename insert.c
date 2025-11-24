@@ -1,3 +1,4 @@
+# include "headers.h"
 # include "insert.h"
 
 int check_record_exists(int id, int *size, struct Record *records) {

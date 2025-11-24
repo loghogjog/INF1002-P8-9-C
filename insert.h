@@ -2,7 +2,7 @@
 #ifndef INSERT_H
 #define INSERT_H
 
-#include "headers.h"
+#include <stdbool.h>
 
 int check_record_exists(int id, int *size, struct Record *records);
 

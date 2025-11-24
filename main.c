@@ -85,8 +85,115 @@ int main(){
 
             printf("The database file \"%s\" is successfully opened.\n", FILENAME);
             file_opened = true;
-
+            free(input_copy);
+            continue;
+        }
+        // UNIQUE (SNAPSHOT)
+        token = strtok(NULL, " \n");
+        if (strcmp(token, "snapshot") == 0) {
+            char cwd[512] = "";
+            if (getcwd(cwd, sizeof(cwd)) == NULL) {
+                perror("Error getting current working directory");
+                free(input_copy);
+                continue;
+            }
             
+            // Create snapshots directory path
+            char dir_path[PATH_MAX] = "";
+            if (snprintf(dir_path, sizeof(dir_path), "%s/snapshots", cwd) >= sizeof(dir_path)) {
+                printf("Error: Directory path too long.\n");
+                free(input_copy);
+                continue;
+            }
+            
+            char *snapshot_ptr = NULL;
+            char *snapshot_name = NULL;
+            
+            // SHOW SNAPSHOT - list all snapshots
+            if ((snapshot_ptr = strstr(input, "show snapshot")) != NULL) {
+                printf("\nAvailable snapshots:\n");
+                file_in_dir(dir_path, NULL);  // Pass NULL to list all files
+                free(input_copy);
+                continue;
+            }
+            // CREATE SNAPSHOT
+            else if ((snapshot_ptr = strstr(input, "create snapshot")) != NULL) {
+                snapshot_name = snapshot_ptr + strlen("create snapshot ");
+                
+                // Trim leading spaces
+                while (*snapshot_name == ' ') snapshot_name++;
+                
+                if (strlen(snapshot_name) == 0) {
+                    printf("Snapshot name not provided.\n");
+                    free(input_copy);
+                    continue;
+                }
+                if (strlen(snapshot_name) > 50) {
+                    printf("Snapshot name too long. Max 50 characters.\n");
+                    free(input_copy);
+                    continue;
+                }
+                
+                // construct the file path with the actual snapshot_name
+                char file_path[PATH_MAX] = "";
+                if (!construct_snapshot_path(cwd, snapshot_name, file_path, sizeof(file_path))) {
+                    free(input_copy);
+                    continue;
+                }
+                
+                create_snapshot(snapshot_name, file_path);
+                free(input_copy);
+                continue;
+            }
+            // RESTORE SNAPSHOT
+            else if ((snapshot_ptr = strstr(input, "restore snapshot")) != NULL) {
+                snapshot_name = snapshot_ptr + strlen("restore snapshot ");
+                
+                while (*snapshot_name == ' ') snapshot_name++;
+                
+                if (strlen(snapshot_name) == 0) {
+                    printf("Snapshot name not provided.\n");
+                    free(input_copy);
+                    continue;
+                }
+                
+                char file_path[PATH_MAX] = "";
+                if (!construct_snapshot_path(cwd, snapshot_name, file_path, sizeof(file_path))) {
+                    free(input_copy);
+                    continue;
+                }
+                
+                restore_snapshot(snapshot_name, file_path);
+                free(input_copy);
+                continue;
+            }
+            // DELETE SNAPSHOT
+            else if ((snapshot_ptr = strstr(input, "delete snapshot")) != NULL) {
+                snapshot_name = snapshot_ptr + strlen("delete snapshot ");
+                
+                while (*snapshot_name == ' ') snapshot_name++;
+                
+                if (strlen(snapshot_name) == 0) {
+                    printf("Snapshot name not provided.\n");
+                    free(input_copy);
+                    continue;
+                }
+                
+                char file_path[PATH_MAX] = "";
+                if (!construct_snapshot_path(cwd, snapshot_name, file_path, sizeof(file_path))) {
+                    free(input_copy);
+                    continue;
+                }
+                
+                delete_snapshot(snapshot_name, file_path);
+                free(input_copy);
+                continue;
+            }
+            else {
+                printf("Use HELP SNAPSHOT to open help menu.\n");
+                free(input_copy);
+                continue;
+            }
         }
         /*
          * READ THIS:
@@ -95,14 +202,12 @@ int main(){
          * records[i].<element> <-- refer to open.h for attribute names
          * use records_size for your loop sizeof
          */
-        // DO OPERATIONS ON RECORDS 
-        // TODO: CREATE HELP MENU
-        // CAN DISPLAY BEFORE OR AFTER WRONG COMMAND ENTERED (TBD)
-
-        // SHOW ALL (ALVAN)
-        
-        // SAVE (ALVAN)
-        
+        // DO OPERATIONS ON RECORDS
+        if (!file_opened) {
+            printf("Open database file first.\n");
+            free(input_copy);
+            continue;
+        }
         // INSERT
         else if ((strcmp(token, "insert") == 0) && file_opened) {
             //check for entry first
@@ -112,23 +217,25 @@ int main(){
             if (ins_fail) {
                 continue; // error msgs printed in insert()
             }
-
         }
-
+        // QUERY
+        // DELETE
+        // SORTING
+        // UPDATE
         // QUERY (TRISTAN KOH)
-        else if ((strcmp(token, "query") == 0) && file_opened) {
+        else if ((strcmp(token, "query") == 0)) {
             char* args = strtok(NULL, "");
             if (args != NULL) {
                 while (*args == ' ') args++;
                 query(records, records_size, args);
             }
             else {
-                printf("CMS: Invalid command. Follow the format: QUERY ID=<ID>\n");
+                printf(" Invalid command. Follow the format: QUERY ID=<ID>\n");
             }
         }
         
         // UPDATE (TRISTAN KOH)
-        else if ((strcmp(token, "update") == 0) && file_opened) {
+        else if ((strcmp(token, "update") == 0)) {
             char* args = strtok(NULL, "");  // Get the rest of the line after "update"
             if (args != NULL) {
                 // Skip leading spaces
@@ -136,24 +243,24 @@ int main(){
                 updateRecord(records, records_size, args);
             }
             else {
-                printf("CMS: Invalid command format. Follow the format: UPDATE ID=<id> <Field>=<Value>\n\n");
+                printf("Invalid command format. Follow the format: UPDATE ID=<id> <Field>=<Value>\n");
             }
         }
         
         // DELETE (TRISTAN KOH)
-        else if ((strcmp(token, "delete") == 0) && file_opened) {
+        else if ((strcmp(token, "delete") == 0)) {
             char* args = strtok(NULL, "");
             if (args != NULL) {
                 while (*args == ' ') args++;
                 delete_record(records, &records_size, args);
             }
             else {
-                printf("CMS: Invalid command. Follow the format: DELETE ID=<ID>\n");
+                printf("Invalid command. Follow the format: DELETE ID=<ID>\n");
             }
         }
 
         // SORT (TRISTAN KOH)
-        else if ((strcmp(token, "sort") == 0) && file_opened) {
+        else if ((strcmp(token, "sort") == 0)) {
 
             char* by = strtok(NULL, " ");
             char* field = strtok(NULL, " ");
@@ -167,26 +274,25 @@ int main(){
             sort_records(records, records_size, field, order);
         }
 
-        
-        // SUMMARY(ALVAN)
-        
-        
-        // Exit 
-        else if (strcmp(input, "exit") == 0) {
-            printf("Exiting...Goodbye :)\n");
-            break;
-        }
-        else if (!file_opened) {
-            printf("Open the database file first with 'open'.\n");
+        // SAVE
+        else if (strcmp(token, "save") == 0) {
+            save(records, records_size);
             continue;
         }
-        else {
-            printf("Unknown command. Only the following commands are available: insert, query, update, delete, save, show all, exit\n");
+        // SHOW ALL
+        else if (strcmp(token, "showall") == 0) {
+            showall(records, records_size);
             continue;
         }
-        for (size_t i = 0; i < records_size; i++) {
-            printf("ID: %d, Name: %s, Prog: %s, Marks: %.2f\n", records[i].id, records[i].name, records[i].prog, records[i].marks); 
+        // SUMMARY
+        else if (strcmp(token, "showsummary") == 0) {
+            showsummary(records, records_size);
+            continue;
         }
+        printf("Unknown command.\n");
+        free(input_copy);
+
+
     } while (true);
 
     /* TO FREE MEMORY USED BY ARRAY
