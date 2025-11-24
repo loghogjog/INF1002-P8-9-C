@@ -8,7 +8,7 @@
 #include <ctype.h>
 #include <dirent.h>
 
-#define DATE_COMPLETED 1234
+#define DATE_COMPLETED "24-11-2025"
 #define FILENAME "P8_9-CMS.txt"
 #define USER "P8-9"
 #define CMS "CMS"
@@ -23,6 +23,7 @@
 #include "delete.h"
 #include "save.h"
 #include "showall.h"
+#include "sort.h"
 #include "showsummary.h"
 #include "snapshot.h"
 

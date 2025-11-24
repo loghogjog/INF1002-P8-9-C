@@ -6,6 +6,29 @@ struct Record *records = NULL;
 int records_size = 0;
 
 int main(){
+    /* === DECLARTION ===*/
+    printf("%55s\n", "Declaration");
+    printf("%s",
+        "SIT’s policy on copying does not allow the students to copy source code as well as assessment solutions\n"
+        "from another person AI or other places. It is the students’ responsibility to guarantee that their\n"
+        "assessment solutions are their own work. Meanwhile, the students must also ensure that their work is\n"
+        "not accessible by others. Where such plagiarism is detected, both of the assessments involved will\n"
+        "receive ZERO mark.\n\n"
+        "We hereby declare that:\n"
+        "\u2022 We fully understand and agree to the abovementioned plagiarism policy.\n"
+        "\u2022 We did not copy any code from others or from other places.\n"
+        "\u2022 We did not share our codes with others or upload to any other places for public access and will not do that in the future.\n"
+        "\u2022 We agree that our project will receive Zero mark if there is any plagiarism detected.\n"
+        "\u2022 We agree that we will not disclose any information or material of the group project to others or upload to any other places for public access.\n"
+        "\u2022 We agree that we did not copy any code directly from AI generated sources\n\n"
+        "Declared by: INF1002 P8-9\n"
+        "Team members:\n"
+        "1. Tristan Tan\n"
+        "2. Alvan Loh\n"
+        "3. Tristan Koh\n"
+        );
+    printf("Date: %s\n\n", DATE_COMPLETED);
+    
     /* === CMS START === */
     printf("%c", '*');
     for (int i = 0; i < 50; i++) {
@@ -195,13 +218,6 @@ int main(){
                 continue;
             }
         }
-        /*
-         * READ THIS:
-         * Records is an array of Structures (Classes)
-         * Loop through the array and access attributes of each structure (row) using:
-         * records[i].<element> <-- refer to open.h for attribute names
-         * use records_size for your loop sizeof
-         */
         // DO OPERATIONS ON RECORDS
         if (!file_opened) {
             printf("Open database file first.\n");
@@ -218,10 +234,6 @@ int main(){
                 continue; // error msgs printed in insert()
             }
         }
-        // QUERY
-        // DELETE
-        // SORTING
-        // UPDATE
         // QUERY (TRISTAN KOH)
         else if ((strcmp(token, "query") == 0)) {
             char* args = strtok(NULL, "");
@@ -232,6 +244,7 @@ int main(){
             else {
                 printf(" Invalid command. Follow the format: QUERY ID=<ID>\n");
             }
+            continue;
         }
         
         // UPDATE (TRISTAN KOH)
@@ -245,6 +258,7 @@ int main(){
             else {
                 printf("Invalid command format. Follow the format: UPDATE ID=<id> <Field>=<Value>\n");
             }
+            continue;
         }
         
         // DELETE (TRISTAN KOH)
@@ -257,6 +271,7 @@ int main(){
             else {
                 printf("Invalid command. Follow the format: DELETE ID=<ID>\n");
             }
+            continue;
         }
 
         // SORT (TRISTAN KOH)
@@ -267,11 +282,12 @@ int main(){
             char* order = strtok(NULL, " ");
 
             if (!by || !field || !order || strcmp(by, "by") != 0) {
-                printf("Please follow the format: SORT BY (ID / MARKS) (ASC / DESC)\n");
+                printf("Please follow the format: SORT BY (ID / MARK) (ASC / DESC)\n");
                 continue;
             }
 
             sort_records(records, records_size, field, order);
+            continue;
         }
 
         // SAVE

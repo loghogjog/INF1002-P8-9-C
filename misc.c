@@ -21,21 +21,23 @@ void help_menu(char *input) {
         printf("Desc: Display help menu for specific command\n");
         printf("Commands:\n");
         printf("\tOPEN\n");
-        printf("\tSHOW ALL\n");
+        printf("\tSHOWALL\n");
         printf("\tINSERT\n");
         printf("\tQUERY\n");
         printf("\tUPDATE\n");
         printf("\tDELETE\n");
         printf("\tSAVE\n");
         printf("\tSNAPSHOT\n");
+        printf("\tSORT\n");
+        printf("\tSUMMARY\n");
     }
     else {
         if (strcmp(input, "open") == 0) {
             printf("Usage: OPEN\n");
             printf("Desc: Open database file. Database file must be opened before any other operations can be performed.\n");
         }
-        else if (strcmp(input, "show all") == 0) {
-            printf("Usage: SHOW ALL\n");
+        else if (strcmp(input, "showall") == 0) {
+            printf("Usage: SHOWALL\n");
             printf("Desc: Displays all available records.\n");
         }
         else if (strcmp(input, "insert") == 0) {
@@ -80,6 +82,19 @@ void help_menu(char *input) {
             printf("\t%-15sCreate a snapshot of the current database file.\n", "CREATE");
             printf("\t%-15sRestores database to a previous snapshot.\n", "RESTORE");
             printf("\t%-15sDelete snapshot.\n", "DELETE");
+        }
+        else if (strcmp(input, "sort") == 0) {
+            printf("Usage: SORT BY [ATTRIBUTE] [ORDER]");
+            printf("Desc: Sort records by attribute and order.\n");
+            printf("Attributes:\n");
+            printf("\t%-15s", "ID");
+            printf("\t%-15s", "MARKS");
+            printf("Order:\n");
+            printf("\t%-15sAscending order.\n", "ASC");
+            printf("\t%-15sDescending order.\n", "DESC");
+        }
+        else if (strcmp(input, "summary") == 0) {
+            printf("Usage: SHOWSUMMARY\n");
         }
         else {
             printf("No help menu available for command %s.\n", input);

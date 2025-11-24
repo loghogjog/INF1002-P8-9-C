@@ -56,11 +56,11 @@ void sort_records(struct Record records[], int records_size, char* field, char* 
     if (strcmp(field, "id") == 0) {
         ctx.field = ID;
     }
-    else if (strcmp(field, "marks") == 0) {
+    else if (strcmp(field, "mark") == 0) {
         ctx.field = MARKS;
     }
     else {
-        printf("Invalid field '%s'. Use ID or MARKS.\n", field);
+        printf("Invalid field '%s'. Use ID or MARK.\n", field);
         return;
     }
 
