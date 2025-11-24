@@ -45,6 +45,7 @@ int main(){
     bool file_opened = false; // check if DB opened
     do {
         // Get User Input
+        # define MAX_INPUT 250 // visual studios requires MAX_INPUT to be defined with a value first
         char input[MAX_INPUT];
         bool success = false; 
         
@@ -265,7 +266,7 @@ int main(){
                 updateRecord(records, records_size, args);
             }
             else {
-                printf("Invalid command format. Follow the format: UPDATE ID=<id> <Field>=<Value>\n");
+                printf("Invalid command. Follow the format: UPDATE ID=<id> <Field>=<Value>\n");
             }
             free(input_copy);
             continue;
