@@ -1,4 +1,9 @@
-# include "headers.h"
+#define _CRT_SECURE_NO_WARNINGS
+#include "headers.h"
+
+// define as global variables
+struct Record *records = NULL;
+int records_size = 0;
 
 int main(){
     /* === DECLARTION ===*/
@@ -22,14 +27,14 @@ int main(){
         "2. Alvan Loh\n"
         "3. Tristan Koh\n"
         );
-    printf("Date: %d\n\n", DATE_COMPLETED);
-
+    printf("Date: %s\n\n", DATE_COMPLETED);
+    
     /* === CMS START === */
     printf("%c", '*');
     for (int i = 0; i < 50; i++) {
         printf("%c", '-');
     }
-    printf("%s", "Welcome to P8-9 CMS");
+    printf("%s", "Welcome to the CMS");
     for (int i = 0; i < 50; i++) {
         printf("%c", '-');
     }
@@ -38,48 +43,35 @@ int main(){
     /* === MAIN FUNCTION === */
 
     bool file_opened = false; // check if DB opened
-    struct Record *records = NULL;
-    int records_size = 0;
-
     do {
         // Get User Input
-        char input[MAX_INPUT] = "";
-        bool success = false;
-
+        char input[MAX_INPUT];
+        bool success = false; 
+        
         do { // explore using strtok directly
 
-            if (records && records_size > 0) {
-                for (size_t i = 0; i < records_size; i++) {
-                    printf("ID: %d, Name: %s, Prog: %s, Marks: %.2f\n", records[i].id, records[i].name, records[i].prog, records[i].marks);
-                }
-            }
-
             printf("%s: ", USER);
-            if (fgets(input, sizeof(input), stdin) == NULL) {
-                // EOF or error
-                printf("\nExiting...\n");
-                if (records) free(records);
-                return 0;
-            }
+
+            fgets(input, sizeof(input), stdin);
+            //input[strcspn(input, "\n")] = 0;
 
             printf("%s: ", CMS);
 
             // buffer overflow
-            size_t len = strlen(input);
+            int len = strlen(input);
             if (len > 0 && input[len - 1] != '\n') { // check if last char is \n
                 int c;
                 while ((c = getchar()) != '\n' && c != EOF); // clear buffer
-
+                
                 printf("Input too long, max %d characters\n", MAX_INPUT - 2); // <-- fgets + \n
                 continue;
             }
 
-            if (len <= 1) {
+            if (len == 1) {
                 printf("Enter a command.\n");
                 continue;
             }
-            // insert more validation below
-
+             
             if (len > 0 && input[len - 1] == '\n') {
                 input[len - 1] = '\0';
                 len--;
@@ -87,55 +79,31 @@ int main(){
 
             success = true;
         } while (!success);
-
-        to_lower(input);
-        char *input_copy = strdup(input); // tokenize copy to preserve original input jic
-
+        
+        to_lower(input);       
+        char *input_copy = strdup(input); // to preserve original input in case
+        printf("%s\n", input_copy); // debug
+        
         if (input_copy == NULL) {
-            if (input_copy == NULL) {
-                fprintf(stderr, "Memory allocation failed.\n");
-                if (records) free(records);
-                return 1;
-            }
+            printf("Input duplicate failed.\n");
+            return 1;
         }
 
+        // moved out of main 
         char *token = strtok(input_copy, " ");
-        if (token == NULL) {
-            free(input_copy);
-            continue;
-        }
 
-        // Exit
-        if (strcmp(input, "exit") == 0) {
-            printf("Exiting...Goodbye :)\n");
-            // TO FREE MEMORY USED BY ARRAY
-            if (records_size > 0) {
-                free(records);
-            }
-            return 0;
-        }
-        // help menu
-        else if (strcmp(token, "help") == 0) {
-            char *arg = strtok(NULL, " ");
-            help_menu(arg);
-            free(input_copy);
-            continue;
-        }
-        /* OPEN FILE (TRISTAN) */
-        else if (strcmp(token, "open") == 0) {
-            // flush previous values if any
-            if (records) {
-                free(records);
-                records = NULL;
-                records_size = 0;
-            }
+        /* OPEN FILE */
+        if (strcmp(token, "open") == 0) {
             // call open file func
             records_size = open_and_read_file(&records, FILENAME);
 
-            if (records == NULL || records_size < 0) {
+            if (!records) {
                 printf("Failed to read from database file %s.\n", FILENAME);
-                free(input_copy);
-                continue;
+                return 1;
+            }
+            if (records_size <= 0) {
+                printf("Invalid record size.\n");
+                return 1;
             }
 
             printf("The database file \"%s\" is successfully opened.\n", FILENAME);
@@ -250,13 +218,6 @@ int main(){
                 continue;
             }
         }
-        /*
-         * READ THIS:
-         * Records is an array of Structures (Classes)
-         * Loop through the array and access attributes of each structure (row) using:
-         * records[i].<element> <-- refer to open.h for attribute names
-         * use records_size for your loop sizeof
-         */
         // DO OPERATIONS ON RECORDS
         if (!file_opened) {
             printf("Open database file first.\n");
@@ -264,19 +225,70 @@ int main(){
             continue;
         }
         // INSERT
-        if (strcmp(token, "insert") == 0)  {
+        else if ((strcmp(token, "insert") == 0) && file_opened) {
             //check for entry first
             bool ins_fail = false;
-            struct Record new_record;
+            struct Record new_record = { 0 };
             ins_fail = insert(new_record, records, &records_size, token); // key function
             if (ins_fail) {
                 continue; // error msgs printed in insert()
             }
         }
-        // QUERY
-        // DELETE
-        // SORTING
-        // UPDATE
+        // QUERY (TRISTAN KOH)
+        else if ((strcmp(token, "query") == 0)) {
+            char* args = strtok(NULL, "");
+            if (args != NULL) {
+                while (*args == ' ') args++;
+                query(records, records_size, args);
+            }
+            else {
+                printf(" Invalid command. Follow the format: QUERY ID=<ID>\n");
+            }
+            continue;
+        }
+        
+        // UPDATE (TRISTAN KOH)
+        else if ((strcmp(token, "update") == 0)) {
+            char* args = strtok(NULL, "");  // Get the rest of the line after "update"
+            if (args != NULL) {
+                // Skip leading spaces
+                while (*args == ' ') args++;
+                updateRecord(records, records_size, args);
+            }
+            else {
+                printf("Invalid command format. Follow the format: UPDATE ID=<id> <Field>=<Value>\n");
+            }
+            continue;
+        }
+        
+        // DELETE (TRISTAN KOH)
+        else if ((strcmp(token, "delete") == 0)) {
+            char* args = strtok(NULL, "");
+            if (args != NULL) {
+                while (*args == ' ') args++;
+                delete_record(records, &records_size, args);
+            }
+            else {
+                printf("Invalid command. Follow the format: DELETE ID=<ID>\n");
+            }
+            continue;
+        }
+
+        // SORT (TRISTAN KOH)
+        else if ((strcmp(token, "sort") == 0)) {
+
+            char* by = strtok(NULL, " ");
+            char* field = strtok(NULL, " ");
+            char* order = strtok(NULL, " ");
+
+            if (!by || !field || !order || strcmp(by, "by") != 0) {
+                printf("Please follow the format: SORT BY (ID / MARK) (ASC / DESC)\n");
+                continue;
+            }
+
+            sort_records(records, records_size, field, order);
+            continue;
+        }
 
         // SAVE
         else if (strcmp(token, "save") == 0) {
@@ -298,6 +310,13 @@ int main(){
 
 
     } while (true);
+
+    /* TO FREE MEMORY USED BY ARRAY
+    for (size_t i = 0; i < total_lines; i++) {
+        free(lines[i]);
+    }
+    free(lines);
+    */
 
 
     return 0;
