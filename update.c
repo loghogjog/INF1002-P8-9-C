@@ -51,7 +51,7 @@ int isValidID(const char* str, int* result) {
 
 void updateRecord(struct Record records[], int records_size, const char* input) {
     if (records_size == 0) {
-        printf("CMS: No records available to update.\n");
+        printf("No records available to update.\n");
         return;
     }
 
@@ -67,7 +67,7 @@ void updateRecord(struct Record records[], int records_size, const char* input) 
         id_start = strstr(command, "id=");
     }
     if (id_start == NULL) {
-        printf("CMS: Missing ID. Usage: UPDATE ID=<id> <Field>=<Value>\n");
+        printf("Missing ID. Usage: UPDATE ID=<id> <Field>=<Value>\n");
         return;
     }
 
@@ -82,7 +82,7 @@ void updateRecord(struct Record records[], int records_size, const char* input) 
 
     int search_id;
     if (!isValidID(id_str, &search_id)) {
-        printf("CMS: Invalid ID format. ID must be an integer.\n");
+        printf("Invalid ID format. ID must be an integer.\n");
         return;
     }
 
@@ -96,7 +96,7 @@ void updateRecord(struct Record records[], int records_size, const char* input) 
     }
 
     if (index == -1) {
-        printf("CMS: The record with ID=%d does not exist.\n", search_id);
+        printf("The record with ID=%d does not exist.\n", search_id);
         return;
     }
 
@@ -106,14 +106,14 @@ void updateRecord(struct Record records[], int records_size, const char* input) 
 
     // Check if there's a field to update
     if (*field_start == '\0') {
-        printf("CMS: Missing field. Usage: UPDATE ID=<id> <Field>=<Value>\n");
+        printf("Missing field. Usage: UPDATE ID=<id> <Field>=<Value>\n");
         return;
     }
 
     // Find the '=' in field=value
     char* eq_ptr = strchr(field_start, '=');
     if (eq_ptr == NULL) {
-        printf("CMS: Missing field value.\n");
+        printf("Missing field value.\n");
         return;
     }
 
@@ -129,14 +129,14 @@ void updateRecord(struct Record records[], int records_size, const char* input) 
 
     // Check if value is empty
     if (*value == '\0') {
-        printf("CMS: Missing value for field '%s'.\n", field);
+        printf("Missing value for field '%s'.\n", field);
         return;
     }
 
     // Update based on field (case-insensitive)
     if (strcasecmp_custom(field, "Name") == 0) {
         if (!isValidName(value)) {
-            printf("CMS: Invalid Name. Name must contain only letters and spaces.\n");
+            printf("Invalid Name. Name must contain only letters and spaces.\n");
             return;
         }
         strncpy(records[index].name, value, sizeof(records[index].name) - 1);
@@ -144,7 +144,7 @@ void updateRecord(struct Record records[], int records_size, const char* input) 
     }
     else if (strcasecmp_custom(field, "Programme") == 0) {
         if (!isValidName(value)) {
-            printf("CMS: Invalid Programme. Programme must contain only letters and spaces.\n");
+            printf("Invalid Programme. Programme must contain only letters and spaces.\n");
             return;
         }
         strncpy(records[index].prog, value, sizeof(records[index].prog) - 1);
@@ -153,19 +153,19 @@ void updateRecord(struct Record records[], int records_size, const char* input) 
     else if (strcasecmp_custom(field, "Mark") == 0) {
         float newMark;
         if (!isValidMarks(value, &newMark)) {
-            printf("CMS: Invalid Mark. Mark must be a valid number.\n");
+            printf("Invalid Mark. Mark must be a valid number.\n");
             return;
         }
         if (newMark < 0 || newMark > 100) {
-            printf("CMS: Invalid Mark. Mark must be between 0 and 100.\n");
+            printf("Invalid Mark. Mark must be between 0 and 100.\n");
             return;
         }
         records[index].marks = newMark;
     }
     else {
-        printf("CMS: Unknown field '%s'. Valid fields: Name, Programme, Mark\n", field);
+        printf("Unknown field '%s'. Valid fields: Name, Programme, Mark\n", field);
         return;
     }
 
-    printf("CMS: The record with ID=%d is successfully updated.\n", search_id);
+    printf("The record with ID=%d is successfully updated.\n", search_id);
 }
