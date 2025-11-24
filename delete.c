@@ -31,7 +31,7 @@ int isValidID_delete(const char* str, int* result) {
 
 void delete_record(struct Record records[], int* records_size, const char* input) {
     if (*records_size == 0) {
-        printf("CMS: No records available to delete.\n");
+        printf("No records available to delete.\n");
         return;
     }
 
@@ -50,7 +50,7 @@ void delete_record(struct Record records[], int* records_size, const char* input
         id_start = strstr(command, "Id=");
     }
     if (id_start == NULL) {
-        printf("CMS: Invalid command. Follow the format: DELETE ID=<ID>\n");
+        printf("Invalid command. Follow the format: DELETE ID=<ID>\n");
         return;
     }
 
@@ -65,7 +65,7 @@ void delete_record(struct Record records[], int* records_size, const char* input
 
     int search_id;
     if (!isValidID_delete(id_str, &search_id)) {
-        printf("CMS: Invalid ID.\n");
+        printf("Invalid ID.\n");
         return;
     }
 
@@ -79,18 +79,18 @@ void delete_record(struct Record records[], int* records_size, const char* input
     }
 
     if (index == -1) {
-        printf("CMS: The record with ID=%d does not exist.\n", search_id);
+        printf("The record with ID=%d does not exist.\n", search_id);
         return;
     }
 
     // Confirm deletion
     char confirm[10];
-    printf("CMS: Are you sure you want to delete record with ID=%d? (y/n): ", search_id);
+    printf("Are you sure you want to delete record with ID=%d? (y/n): ", search_id);
     fgets(confirm, sizeof(confirm), stdin);
     confirm[strcspn(confirm, "\n")] = '\0';
 
     if (strcasecmp_delete(confirm, "y") != 0 && strcasecmp_delete(confirm, "yes") != 0) {
-        printf("CMS: Cancelled.\n");
+        printf("Cancelled.\n");
         return;
     }
 
@@ -100,5 +100,5 @@ void delete_record(struct Record records[], int* records_size, const char* input
     }
     (*records_size)--;
 
-    printf("CMS: The record with ID=%d is successfully deleted.\n", search_id);
+    printf("The record with ID=%d is successfully deleted.\n", search_id);
 }

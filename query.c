@@ -19,7 +19,7 @@ int isValidID_query(const char* str, int* result) {
 
 void query(struct Record* records, int records_size, const char* input) {
     if (records_size == 0) {
-        printf("CMS: No records available to query.\n");
+        printf("No records available to query.\n");
         return;
     }
 
@@ -38,7 +38,7 @@ void query(struct Record* records, int records_size, const char* input) {
         id_start = strstr(command, "Id=");
     }
     if (id_start == NULL) {
-        printf("CMS: Invalid command. Follow the format: QUERY ID=<ID>\n");
+        printf("Invalid command. Follow the format: QUERY ID=<ID>\n");
         return;
     }
 
@@ -53,7 +53,7 @@ void query(struct Record* records, int records_size, const char* input) {
 
     int search_id;
     if (!isValidID_query(id_str, &search_id)) {
-        printf("CMS: Invalid ID.\n");
+        printf("Invalid ID.\n");
         return;
     }
 
@@ -67,14 +67,14 @@ void query(struct Record* records, int records_size, const char* input) {
     }
 
     if (index == -1) {
-        printf("CMS: The record with ID=%d does not exist.\n", search_id);
+        printf("The record with ID=%d does not exist.\n", search_id);
         return;
     }
 
     // Display the record in table format (edit later to follow max length of inputs)
-    printf("CMS: The record with ID=%d is found in the data table\n", search_id);
-    printf("%-10s %-20s %-25s %-6s\n", "ID", "Name", "Programme", "Mark");
-    printf("%-10d %-20s %-25s %-6.1f\n",
+    printf("The record with ID=%d is found in the data table\n", search_id);
+    printf("%-10s %-30s %-50s%-6s\n", "ID", "Name", "Programme", "Mark");
+    printf("%-10d %-30s %-50s %-6.1f\n",
         records[index].id,
         records[index].name,
         records[index].prog,
