@@ -44,6 +44,12 @@
 /* Indicates that d_namlen field is available in dirent structure */
 #define _DIRENT_HAVE_D_NAMLEN
 
+/* Define WINAPI_FAMILY macros for non-MSVC compilers */
+#ifndef WINAPI_FAMILY_PARTITION
+#	define WINAPI_PARTITION_DESKTOP 0x00000001
+#	define WINAPI_FAMILY_PARTITION(Partition) (Partition)
+#endif
+
 /* Entries missing from MSVC 6.0 */
 #if !defined(FILE_ATTRIBUTE_DEVICE)
 #	define FILE_ATTRIBUTE_DEVICE 0x40

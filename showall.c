@@ -8,7 +8,7 @@ int showall(struct Record *records, int total_records)
     printf("\n");
 
     // check if anything in record file
-    if (total_records == NULL)
+    if (total_records == 0)
     {
         printf("Error, No Records Found! \n");
         return -1;
