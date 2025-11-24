@@ -77,5 +77,6 @@ void sort_records(struct Record records[], int records_size, char* field, char* 
 
     insertion_sort(records, records_size, &ctx);
 
-    printf("Showing all records: sorted by %s %s.\n", field, order);
+    printf("Records have been sorted by %s %s.\n", field, order);
 }
+
