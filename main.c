@@ -144,7 +144,8 @@ int main(){
             continue;
         }
         // UNIQUE (SNAPSHOT)
-        else if (strstr(input, "snapshot") != NULL) {
+        token = strtok(NULL, " \n");
+        if (strcmp(token, "snapshot") == 0) {
             char cwd[512] = "";
             if (getcwd(cwd, sizeof(cwd)) == NULL) {
                 perror("Error getting current working directory");
@@ -257,7 +258,7 @@ int main(){
          * use records_size for your loop sizeof
          */
         // DO OPERATIONS ON RECORDS
-        else if (!file_opened) {
+        if (!file_opened) {
             printf("Open database file first.\n");
             free(input_copy);
             continue;
@@ -280,14 +281,17 @@ int main(){
         // SAVE
         else if (strcmp(token, "save") == 0) {
             save(records, records_size);
+            continue;
         }
         // SHOW ALL
         else if (strcmp(token, "showall") == 0) {
             showall(records, records_size);
+            continue;
         }
         // SUMMARY
         else if (strcmp(token, "showsummary") == 0) {
             showsummary(records, records_size);
+            continue;
         }
         printf("Unknown command.\n");
         free(input_copy);
