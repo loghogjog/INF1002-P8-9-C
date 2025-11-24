@@ -82,8 +82,7 @@ int main(){
         
         to_lower(input);       
         char *input_copy = strdup(input); // to preserve original input in case
-        printf("%s\n", input_copy); // debug
-        
+
         if (input_copy == NULL) {
             printf("Input duplicate failed.\n");
             return 1;
@@ -91,6 +90,11 @@ int main(){
 
         // moved out of main 
         char *token = strtok(input_copy, " ");
+        if (token == NULL) {
+            printf("Enter a command.\n");
+            free(input_copy);
+            continue;
+        }
 
         /* OPEN FILE */
         if (strcmp(token, "open") == 0) {
@@ -99,10 +103,12 @@ int main(){
 
             if (!records) {
                 printf("Failed to read from database file %s.\n", FILENAME);
+                free(input_copy);
                 return 1;
             }
             if (records_size <= 0) {
                 printf("Invalid record size.\n");
+                free(input_copy);
                 return 1;
             }
 
@@ -112,8 +118,9 @@ int main(){
             continue;
         }
         // UNIQUE (SNAPSHOT)
-        token = strtok(NULL, " \n");
-        if (strcmp(token, "snapshot") == 0) {
+        if (strstr(input, "snapshot") != NULL) {
+            token = strtok(NULL, " \n");
+            if (strcmp(token, "snapshot") != 0) continue; // cant use strtok outside else other features crash
             char cwd[512] = "";
             if (getcwd(cwd, sizeof(cwd)) == NULL) {
                 perror("Error getting current working directory");
@@ -225,17 +232,18 @@ int main(){
             continue;
         }
         // INSERT
-        else if ((strcmp(token, "insert") == 0) && file_opened) {
+        else if (strcmp(token, "insert") == 0) {
             //check for entry first
             bool ins_fail = false;
             struct Record new_record = { 0 };
             ins_fail = insert(new_record, records, &records_size, token); // key function
             if (ins_fail) {
+                free(input_copy);
                 continue; // error msgs printed in insert()
             }
         }
         // QUERY (TRISTAN KOH)
-        else if ((strcmp(token, "query") == 0)) {
+        else if (strcmp(token, "query") == 0) {
             char* args = strtok(NULL, "");
             if (args != NULL) {
                 while (*args == ' ') args++;
@@ -244,11 +252,12 @@ int main(){
             else {
                 printf(" Invalid command. Follow the format: QUERY ID=<ID>\n");
             }
+            free(input_copy);
             continue;
         }
         
         // UPDATE (TRISTAN KOH)
-        else if ((strcmp(token, "update") == 0)) {
+        else if (strcmp(token, "update") == 0) {
             char* args = strtok(NULL, "");  // Get the rest of the line after "update"
             if (args != NULL) {
                 // Skip leading spaces
@@ -258,11 +267,12 @@ int main(){
             else {
                 printf("Invalid command format. Follow the format: UPDATE ID=<id> <Field>=<Value>\n");
             }
+            free(input_copy);
             continue;
         }
         
         // DELETE (TRISTAN KOH)
-        else if ((strcmp(token, "delete") == 0)) {
+        else if (strcmp(token, "delete") == 0) {
             char* args = strtok(NULL, "");
             if (args != NULL) {
                 while (*args == ' ') args++;
@@ -271,11 +281,12 @@ int main(){
             else {
                 printf("Invalid command. Follow the format: DELETE ID=<ID>\n");
             }
+            free(input_copy);
             continue;
         }
 
         // SORT (TRISTAN KOH)
-        else if ((strcmp(token, "sort") == 0)) {
+        else if (strcmp(token, "sort") == 0) {
 
             char* by = strtok(NULL, " ");
             char* field = strtok(NULL, " ");
@@ -283,26 +294,31 @@ int main(){
 
             if (!by || !field || !order || strcmp(by, "by") != 0) {
                 printf("Please follow the format: SORT BY (ID / MARK) (ASC / DESC)\n");
+                free(input_copy);
                 continue;
             }
 
             sort_records(records, records_size, field, order);
+            free(input_copy);
             continue;
         }
 
         // SAVE
         else if (strcmp(token, "save") == 0) {
             save(records, records_size);
+            free(input_copy);
             continue;
         }
         // SHOW ALL
         else if (strcmp(token, "showall") == 0) {
             showall(records, records_size);
+            free(input_copy);
             continue;
         }
         // SUMMARY
         else if (strcmp(token, "showsummary") == 0) {
             showsummary(records, records_size);
+            free(input_copy);
             continue;
         }
         printf("Unknown command.\n");

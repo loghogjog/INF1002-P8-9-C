@@ -15,18 +15,29 @@ int showall(struct Record *records, int total_records)
     }
 
     // print table header
-    printf("%-5s %-25s %-25s %-10s\n", "ID", "Name", "Program,", "Marks");
-    printf("----------------------------------------------------------\n");
+    printf("%-10s %-30s %-50s %-6s\n", "ID", "Name", "Program,", "Marks");
+    for (int i = 0; i < 100; i++) {
+        printf("%s","-");
+        if (i == 99) {
+            printf("\n");
+        }
+    }
+
 
     // arr record in table
     int i;
     for (i = 0; i < total_records; i++)
     {
-        printf("%-5d %-25s %-25s %-10.2f\n", records[i].id, records[i].name, records[i].prog, records[i].marks);
+        printf("%-10d %-30s %-50s %-6.2f\n", records[i].id, records[i].name, records[i].prog, records[i].marks);
     }
 
     // footer
-    printf("----------------------------------------------------------\n");
+    for (int i = 0; i < 100; i++) {
+        printf("%s","-");
+        if (i == 99) {
+            printf("\n");
+        }
+    }
 
     // tabulate record number for easier viewing
     printf("Total Records: %d\n", total_records);

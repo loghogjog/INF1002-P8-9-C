@@ -2,9 +2,12 @@
 #define SNAPSHOT_H
 
 #include "headers.h"
-#include <unistd.h>
-#include <dirent.h>
-#include <sys/stat.h>
+#if defined(_WIN32) || defined(_WIN64)
+    #include <direct.h>
+    #define mkdir(path,mode) _mkdir(path)
+#else
+    #include <sys/stat.h>
+#endif
 
 bool file_in_dir(const char *path, const char *snapshot_name);
 
