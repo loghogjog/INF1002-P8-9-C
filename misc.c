@@ -18,7 +18,7 @@ void help_menu(char *input) {
     // print help menu
     if (input == NULL) {
         printf("Usage: HELP [COMMAND]\n");
-        printf("Desc: Display help menu for specific command\n");
+        printf("Desc: Display help menu for specified command\n");
         printf("Commands:\n");
         printf("\tOPEN\n");
         printf("\tSHOWALL\n");

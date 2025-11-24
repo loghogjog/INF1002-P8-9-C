@@ -1,18 +1,8 @@
-# include "snapshot.h"
+#include "snapshot.h"
 
-// PLACE SNAPSHOTS IN SEPERATE DIRECTORY
+// PLACE SNAPSHOTS IN SEPARATE DIRECTORY
 bool file_in_dir(const char *path, const char *snapshot_name) {
-    // Check for path traversal attempts
-    if (snapshot_name != NULL) {
-        if (strstr(snapshot_name, "..") != NULL ||
-            strchr(snapshot_name, '/') != NULL ||
-            strchr(snapshot_name, '\\') != NULL) {
-            printf("Invalid snapshot name. Cannot contain '..' or path separators.\n");
-            return false;
-        }
-    }
-    // check if dir exists
-    // creates dir if not
+    // check if dir exists, creates dir if not
     struct stat st = {0};
     if (stat(path, &st) == -1) {
         if (mkdir(path, 0755) != 0) {
@@ -20,46 +10,52 @@ bool file_in_dir(const char *path, const char *snapshot_name) {
             return false;
         }
     }
+    
     // open dir and search for file
-    DIR *dir;
-    dir = opendir(path);
-
+    DIR *dir = opendir(path);
     if (dir == NULL) {
-        perror("Failed to open directory %s.\n");
+        printf("Failed to open directory %s.\n", path);
         return false;
     }
 
     struct dirent *entry;
     bool found = false;
+    
     while ((entry = readdir(dir)) != NULL) {
         if (snapshot_name == NULL) {
-            // skip hidden files
+            // List all files (skip hidden files)
             if (entry->d_name[0] == '.') continue;
             printf("%s\n", entry->d_name);
-            // return value doesnt matter
         }
         else {
+            // Search for specific file
             if (strcmp(entry->d_name, snapshot_name) == 0) {
                 found = true;
                 break;
             }
         }
-
     }
+    
     closedir(dir);
-
     return found;
 }
 
-// Validate snapshot name to prevent path traversal
+// Validate snapshot name 
 bool is_valid_snapshot_name(const char *snapshot_name) {
     if (snapshot_name == NULL || strlen(snapshot_name) == 0) {
+        printf("Invalid snapshot name.\n");
         return false;
     }
 
-
-
-    // limit length to prevent buffer issues (delcared max is 50 in main.c)
+    // Check for path traversal attempts
+    if (strstr(snapshot_name, "..") != NULL ||
+        strchr(snapshot_name, '/') != NULL ||
+        strchr(snapshot_name, '\\') != NULL) {
+        printf("Invalid snapshot name. Cannot contain '..' or path separators.\n");
+        return false;
+    }
+    
+    // limit length to prevent buffer issues (declared max is 50 in main.c)
     if (strlen(snapshot_name) > 50) {
         printf("Snapshot name too long.\n");
         return false;
@@ -68,38 +64,19 @@ bool is_valid_snapshot_name(const char *snapshot_name) {
     return true;
 }
 
-// construct safe file path
-bool construct_snapshot_path(const char *cwd, const char *snapshot_name,
-                             char *buffer, size_t buffer_size) {
-    // Use snprintf for safe string concatenation
-    int written = snprintf(buffer, buffer_size, "%s/snapshots/%s", cwd, snapshot_name);
-
-    if (written < 0 || written >= buffer_size) {
-        printf("Error: Path too long\n");
-        return false;
-    }
-
-    return true;
+// Construct snapshot directory path: cwd/snapshots
+bool construct_snapshot_dir(const char *cwd, char *buffer, size_t buffer_size) {
+    int written = snprintf(buffer, buffer_size, "%s/snapshots", cwd);
+    return (written >= 0 && (size_t)written < buffer_size);
 }
 
-// SNAPSHOT FUNCTION
-bool create_snapshot(const char *snapshot_name, char *file_path) {
-    // validate no funny business in snapshot name
-    if (!is_valid_snapshot_name(snapshot_name)) {
-        printf("Invalid snapshot name.\n");
-        return false;
-    }
-
-    // validate snapshot folder exists
-    if (file_in_dir(file_path, snapshot_name)) {
-        printf("Snapshot \"%s\" already in snapshots folder. Use a different name.\n", snapshot_name);
-        return false;
-    }
-
+// SNAPSHOT FUNCTION - now takes file_path parameter
+bool create_snapshot(const char *snapshot_name, const char *file_path) {
+    
     // open snapshot file
     FILE *snapshot_file = fopen(file_path, "r");
     if (snapshot_file != NULL) {
-        printf("Snapshot \"%s\" already exists. Use a different name. \n", snapshot_name);
+        printf("Snapshot \"%s\" already exists. Use a different name.\n", snapshot_name);
         fclose(snapshot_file);
         return false;
     }
@@ -107,7 +84,7 @@ bool create_snapshot(const char *snapshot_name, char *file_path) {
     // Check if DB file exists
     FILE *db_file = fopen(FILENAME, "r");
     if (db_file == NULL) {
-        printf("Unable to open database file \"%s\"", FILENAME);
+        printf("Unable to open database file \"%s\"\n", FILENAME);
         return false;
     }
 
@@ -133,7 +110,8 @@ bool create_snapshot(const char *snapshot_name, char *file_path) {
     }
 
     for (int i = 0; i < records_size; i++) {
-        fprintf(snapshot_file, "%d,%s,%s,%.2f\n", records[i].id, records[i].name, records[i].prog, records[i].marks);
+        fprintf(snapshot_file, "%d,%s,%s,%.2f\n", 
+                records[i].id, records[i].name, records[i].prog, records[i].marks);
     }
 
     if (fclose(snapshot_file) != 0) {
@@ -148,7 +126,8 @@ bool create_snapshot(const char *snapshot_name, char *file_path) {
     int snapshot_size = open_and_read_file(&snapshot, file_path);
 
     if (snapshot_size != records_size) {
-        printf("Snapshot verification failed. Snapshot \"%s\" size does not match current record \"%s\" size.\n", snapshot_name, FILENAME);
+        printf("Snapshot verification failed. Snapshot \"%s\" size does not match current record \"%s\" size.\n", 
+               snapshot_name, FILENAME);
         if (records_size > 0) free(records);
         if (snapshot_size > 0) free(snapshot);
         return false;
@@ -164,23 +143,12 @@ bool create_snapshot(const char *snapshot_name, char *file_path) {
 
 
 // RESTORE FUNCTION
-bool restore_snapshot(const char *snapshot_name, char *file_path) {
-    // validate no funny business in snapshot name
-    if (!is_valid_snapshot_name(snapshot_name)) {
-        printf("Invalid snapshot name.\n");
-        return false;
-    }
-
-    // validate snapshot folder exists and snapshot file in it
-    if (!file_in_dir(file_path, snapshot_name)) {
-        printf("Snapshot \"%s\" not in snapshots folder.\n", snapshot_name);
-        return false;
-    }
-
+bool restore_snapshot(const char *snapshot_name, const char *file_path) {
+    // Note: validation already done in main handler
+    
     FILE *snapshot_file = fopen(file_path, "r");
-
     if (snapshot_file == NULL) {
-        printf("Snapshot file \"%s\" does not exist.\n",snapshot_name);
+        printf("Snapshot file \"%s\" does not exist.\n", snapshot_name);
         return false;
     }
     fclose(snapshot_file);
@@ -194,7 +162,6 @@ bool restore_snapshot(const char *snapshot_name, char *file_path) {
     }
 
     FILE *db_file = fopen(FILENAME, "w");
-
     if (db_file == NULL) {
         printf("Unable to open database file \"%s\" for writing.\n", FILENAME);
         if (snapshot_size > 0) free(snapshot_records);
@@ -202,7 +169,9 @@ bool restore_snapshot(const char *snapshot_name, char *file_path) {
     }
 
     for (int i = 0; i < snapshot_size; i++) {
-        fprintf(db_file, "%d,%s,%s,%.2f\n", snapshot_records[i].id, snapshot_records[i].name, snapshot_records[i].prog, snapshot_records[i].marks);
+        fprintf(db_file, "%d,%s,%s,%.2f\n", 
+                snapshot_records[i].id, snapshot_records[i].name, 
+                snapshot_records[i].prog, snapshot_records[i].marks);
     }
 
     if (fclose(db_file) != 0) {
@@ -210,6 +179,7 @@ bool restore_snapshot(const char *snapshot_name, char *file_path) {
         if (snapshot_size > 0) free(snapshot_records);
         return false;
     }
+    
     printf("Snapshot restored. Verifying...\n");
 
     struct Record *restored_records;
@@ -230,17 +200,9 @@ bool restore_snapshot(const char *snapshot_name, char *file_path) {
     return true;
 }
 
-bool delete_snapshot(const char *snapshot_name, char *file_path) {
-    if (!is_valid_snapshot_name(snapshot_name)) {
-        printf("Invalid snapshot name provided.\n");
-        return false;
-    }
-
-    if (!file_in_dir(file_path, snapshot_name)) {
-        printf("Snapshot \"%s\" not in snapshots folder.\n", snapshot_name);
-        return false;
-    }
-
+bool delete_snapshot(const char *snapshot_name, const char *file_path) {
+    // Note: validation already done in main handler
+    
     FILE *file = fopen(file_path, "r");
     if (file == NULL) {
         printf("Snapshot \"%s\" does not exist.\n", snapshot_name);
@@ -248,11 +210,11 @@ bool delete_snapshot(const char *snapshot_name, char *file_path) {
     }
     fclose(file);
 
-
-    if (remove(file_path) == 0) { // only deletes from snapshot folder
+    if (remove(file_path) == 0) {
         printf("Snapshot \"%s\" successfully deleted.\n", snapshot_name);
+        return true;
     } else {
         printf("Unable to delete snapshot \"%s\".\n", snapshot_name);
+        return false;
     }
-    return true;
 }

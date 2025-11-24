@@ -28,7 +28,7 @@ int main(){
         "3. Tristan Koh\n"
         );
     printf("Date: %s\n\n", DATE_COMPLETED);
-    
+
     /* === CMS START === */
     printf("%c", '*');
     for (int i = 0; i < 50; i++) {
@@ -47,8 +47,8 @@ int main(){
         // Get User Input
         # define MAX_INPUT 250 // visual studios requires MAX_INPUT to be defined with a value first
         char input[MAX_INPUT];
-        bool success = false; 
-        
+        bool success = false;
+
         do { // explore using strtok directly
 
             printf("%s: ", USER);
@@ -63,7 +63,7 @@ int main(){
             if (len > 0 && input[len - 1] != '\n') { // check if last char is \n
                 int c;
                 while ((c = getchar()) != '\n' && c != EOF); // clear buffer
-                
+
                 printf("Input too long, max %d characters\n", MAX_INPUT - 2); // <-- fgets + \n
                 continue;
             }
@@ -72,7 +72,7 @@ int main(){
                 printf("Enter a command.\n");
                 continue;
             }
-             
+
             if (len > 0 && input[len - 1] == '\n') {
                 input[len - 1] = '\0';
                 len--;
@@ -80,8 +80,8 @@ int main(){
 
             success = true;
         } while (!success);
-        
-        to_lower(input);       
+
+        to_lower(input);
         char *input_copy = strdup(input); // to preserve original input in case
 
         if (input_copy == NULL) {
@@ -89,7 +89,7 @@ int main(){
             return 1;
         }
 
-        // moved out of main 
+        // moved out of main
         char *token = strtok(input_copy, " ");
         if (token == NULL) {
             printf("Enter a command.\n");
@@ -97,8 +97,23 @@ int main(){
             continue;
         }
 
+        // EXIT
+        if (strcmp(token, "exit") == 0) {
+            printf("Exiting...Goodbye :)\n");
+            if (file_opened) {
+                free(input_copy);
+                free(records);
+            }
+            return 0;
+        }
+        else if (strcmp(token, "help") == 0) {
+            char *arg = strtok(NULL, " \n");
+            help_menu(arg);
+            free(input_copy);
+            continue;
+        }
         /* OPEN FILE */
-        if (strcmp(token, "open") == 0) {
+        else if (strcmp(token, "open") == 0) {
             // call open file func
             records_size = open_and_read_file(&records, FILENAME);
 
@@ -121,57 +136,62 @@ int main(){
         // UNIQUE (SNAPSHOT)
         if (strstr(input, "snapshot") != NULL) {
             token = strtok(NULL, " \n");
-            if (strcmp(token, "snapshot") != 0) continue; // cant use strtok outside else other features crash
+            if (strcmp(token, "snapshot") != 0){
+                printf("Unknown command. Use HELP to see help menu.\n");
+                continue;
+            }
+            // Get current working directory
             char cwd[512] = "";
             if (getcwd(cwd, sizeof(cwd)) == NULL) {
                 perror("Error getting current working directory");
                 free(input_copy);
                 continue;
             }
-            
-            // Create snapshots directory path
+
+            // Create snapshots directory path ONCE for all operations
             char dir_path[PATH_MAX] = "";
-            if (snprintf(dir_path, sizeof(dir_path), "%s/snapshots", cwd) >= sizeof(dir_path)) {
+            if (!construct_snapshot_dir(cwd, dir_path, sizeof(dir_path))) {
                 printf("Error: Directory path too long.\n");
                 free(input_copy);
                 continue;
             }
-            
+
             char *snapshot_ptr = NULL;
             char *snapshot_name = NULL;
-            
+
             // SHOW SNAPSHOT - list all snapshots
             if ((snapshot_ptr = strstr(input, "show snapshot")) != NULL) {
                 printf("\nAvailable snapshots:\n");
-                file_in_dir(dir_path, NULL);  // Pass NULL to list all files
+                file_in_dir(dir_path, NULL); // Pass NULL to list all files
                 free(input_copy);
                 continue;
             }
             // CREATE SNAPSHOT
             else if ((snapshot_ptr = strstr(input, "create snapshot")) != NULL) {
                 snapshot_name = snapshot_ptr + strlen("create snapshot ");
-                
                 // Trim leading spaces
                 while (*snapshot_name == ' ') snapshot_name++;
-                
-                if (strlen(snapshot_name) == 0) {
-                    printf("Snapshot name not provided.\n");
+
+                // Remove trailing newline/spaces
+                char *end = snapshot_name + strlen(snapshot_name) - 1;
+                while (end > snapshot_name && (*end == ' ' || *end == '\n')) {
+                    *end = '\0';
+                    end--;
+                }
+
+                if (!is_valid_snapshot_name(snapshot_name)) {
                     free(input_copy);
                     continue;
                 }
-                if (strlen(snapshot_name) > 50) {
-                    printf("Snapshot name too long. Max 50 characters.\n");
-                    free(input_copy);
-                    continue;
-                }
-                
-                // construct the file path with the actual snapshot_name
+
+                // Construct full file path: dir_path + "/" + snapshot_name
                 char file_path[PATH_MAX] = "";
-                if (!construct_snapshot_path(cwd, snapshot_name, file_path, sizeof(file_path))) {
+                if (snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, snapshot_name) >= sizeof(file_path)) {
+                    printf("Error: File path too long.\n");
                     free(input_copy);
                     continue;
                 }
-                
+
                 create_snapshot(snapshot_name, file_path);
                 free(input_copy);
                 continue;
@@ -179,21 +199,41 @@ int main(){
             // RESTORE SNAPSHOT
             else if ((snapshot_ptr = strstr(input, "restore snapshot")) != NULL) {
                 snapshot_name = snapshot_ptr + strlen("restore snapshot ");
-                
                 while (*snapshot_name == ' ') snapshot_name++;
-                
+
+                // Remove trailing newline/spaces
+                char *end = snapshot_name + strlen(snapshot_name) - 1;
+                while (end > snapshot_name && (*end == ' ' || *end == '\n')) {
+                    *end = '\0';
+                    end--;
+                }
+
                 if (strlen(snapshot_name) == 0) {
                     printf("Snapshot name not provided.\n");
                     free(input_copy);
                     continue;
                 }
-                
-                char file_path[PATH_MAX] = "";
-                if (!construct_snapshot_path(cwd, snapshot_name, file_path, sizeof(file_path))) {
+
+                if (!is_valid_snapshot_name(snapshot_name)) {
                     free(input_copy);
                     continue;
                 }
-                
+
+                // Check if snapshot exists in directory first
+                if (!file_in_dir(dir_path, snapshot_name)) {
+                    printf("Snapshot \"%s\" not found in snapshots folder.\n", snapshot_name);
+                    free(input_copy);
+                    continue;
+                }
+
+                // Construct full file path
+                char file_path[PATH_MAX] = "";
+                if (snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, snapshot_name) >= sizeof(file_path)) {
+                    printf("Error: File path too long.\n");
+                    free(input_copy);
+                    continue;
+                }
+
                 restore_snapshot(snapshot_name, file_path);
                 free(input_copy);
                 continue;
@@ -201,21 +241,41 @@ int main(){
             // DELETE SNAPSHOT
             else if ((snapshot_ptr = strstr(input, "delete snapshot")) != NULL) {
                 snapshot_name = snapshot_ptr + strlen("delete snapshot ");
-                
                 while (*snapshot_name == ' ') snapshot_name++;
-                
+
+                // Remove trailing newline/spaces
+                char *end = snapshot_name + strlen(snapshot_name) - 1;
+                while (end > snapshot_name && (*end == ' ' || *end == '\n')) {
+                    *end = '\0';
+                    end--;
+                }
+
                 if (strlen(snapshot_name) == 0) {
                     printf("Snapshot name not provided.\n");
                     free(input_copy);
                     continue;
                 }
-                
-                char file_path[PATH_MAX] = "";
-                if (!construct_snapshot_path(cwd, snapshot_name, file_path, sizeof(file_path))) {
+
+                if (!is_valid_snapshot_name(snapshot_name)) {
                     free(input_copy);
                     continue;
                 }
-                
+
+                // Check if snapshot exists in directory first
+                if (!file_in_dir(dir_path, snapshot_name)) {
+                    printf("Snapshot \"%s\" not found in snapshots folder.\n", snapshot_name);
+                    free(input_copy);
+                    continue;
+                }
+
+                // Construct full file path
+                char file_path[PATH_MAX] = "";
+                if (snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, snapshot_name) >= sizeof(file_path)) {
+                    printf("Error: File path too long.\n");
+                    free(input_copy);
+                    continue;
+                }
+
                 delete_snapshot(snapshot_name, file_path);
                 free(input_copy);
                 continue;
@@ -240,8 +300,8 @@ int main(){
             ins_fail = insert(new_record, records, &records_size, token); // key function
             if (ins_fail) {
                 free(input_copy);
-                continue; // error msgs printed in insert()
             }
+            continue;
         }
         // QUERY (TRISTAN KOH)
         else if (strcmp(token, "query") == 0) {
@@ -256,7 +316,7 @@ int main(){
             free(input_copy);
             continue;
         }
-        
+
         // UPDATE (TRISTAN KOH)
         else if (strcmp(token, "update") == 0) {
             char* args = strtok(NULL, "");  // Get the rest of the line after "update"
@@ -271,7 +331,7 @@ int main(){
             free(input_copy);
             continue;
         }
-        
+
         // DELETE (TRISTAN KOH)
         else if (strcmp(token, "delete") == 0) {
             char* args = strtok(NULL, "");
