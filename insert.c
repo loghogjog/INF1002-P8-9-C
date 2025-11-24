@@ -116,7 +116,13 @@ bool insert(struct Record data, struct Record *records, int *records_size, char 
             value_len = next_key_pos - value_pos - 1; // -1 for whitespace
         }
 
-        char value[value_len + 1]; // account for null byte
+        #define MAX_VALUE_LEN 50 // follow max len of program since it is the longest
+        char value[MAX_VALUE_LEN + 1]; // account for null byte
+        
+        if (value_len > MAX_VALUE_LEN) {
+            return true;
+        }
+        
         strncpy(value, value_pos, value_len);
         value[value_len] = '\0';
 
@@ -145,21 +151,21 @@ bool insert(struct Record data, struct Record *records, int *records_size, char 
             // different method to get value to account for spaces
             /* Idea: Get all */
 
-            if (strlen(value) > 100) {
-                printf("Name max 100 characters.\n");
+            if (strlen(value) > 30) {
+                printf("Name max 30 characters.\n");
                 return true;
             }
-            strncpy(data.name, value, 99);
-            data.name[99] = 0;
+            strncpy(data.name, value, 29);
+            data.name[29] = 0;
             data.has_name = true;
         }
         else if (strcmp(key_name, "programme") == 0) {
-            if (strlen(value) > 250) {
-                printf("Programme max 250 characters.\n");
+            if (strlen(value) > 50) {
+                printf("Programme max 50 characters.\n");
                 return true;
             }
-            strncpy(data.prog, value, 249);
-            data.prog[249] = 0; 
+            strncpy(data.prog, value, 50);
+            data.prog[50] = 0; 
             data.has_prog = true;
         }
         else if (strcmp(key_name, "mark") == 0) {
